@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\runtime\schedule.cpp" />
+    <ClCompile Include="..\runtime\src\SDL3Window.cpp">
+      <Filter>window</Filter>
+    </ClCompile>
+    <ClCompile Include="..\runtime\src\rtdebug.c">
+      <Filter>debug</Filter>
+    </ClCompile>
+    <ClCompile Include="..\runtime\src\win32_time.c">
+      <Filter>time</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="debug">
+      <UniqueIdentifier>{ce32ec42-adea-43ed-9592-9096e3d54296}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="window">
+      <UniqueIdentifier>{76242603-ba41-4b50-99ef-21ce9bb5462a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="time">
+      <UniqueIdentifier>{e10f310c-3f3d-4348-bb9c-e310a2cb5e93}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

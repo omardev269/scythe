@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="core">
+      <UniqueIdentifier>{9985e427-2dd6-441f-8ad2-a8469f5c6b28}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\workflow">
+      <UniqueIdentifier>{e6bb5c39-21b9-455c-ba50-e2dfa6dbfb9e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\workflow\d3d11">
+      <UniqueIdentifier>{cd0d001a-4b84-49a8-b511-28f3402cd86e}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\graphicsCore.c">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\device.cpp">
+      <Filter>core\workflow</Filter>
+    </ClCompile>
+    <ClCompile Include="src\d3d11device.cpp">
+      <Filter>core\workflow\d3d11</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

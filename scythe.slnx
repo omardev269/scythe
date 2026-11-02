@@ -1,0 +1,39 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Folder Name="/graphics/">
+    <Project Path="graphics/graphics.vcxproj" Id="432bc4a1-904a-432e-b2f9-0be93422a351" />
+  </Folder>
+  <Folder Name="/graphics/core/">
+    <File Path="common/graphics/graphicsCore.h" />
+  </Folder>
+  <Folder Name="/graphics/core/workflow/">
+    <File Path="common/graphics/IDevice.h" />
+  </Folder>
+  <Folder Name="/graphics/core/workflow/d3d11/">
+    <File Path="graphics/src/d3d11device.h" />
+  </Folder>
+  <Folder Name="/runtime/">
+    <Project Path="runtime_win32/runtime_win32.vcxproj" Id="f8db8f69-3537-459b-9947-c599f931b20c" />
+  </Folder>
+  <Folder Name="/runtime/core/">
+    <File Path="common/runtime/engineCore.h" />
+    <File Path="common/runtime/engineCore_C.h" />
+  </Folder>
+  <Folder Name="/runtime/debug/">
+    <File Path="common/runtime/rtdebug.h" />
+  </Folder>
+  <Folder Name="/runtime/time/">
+    <File Path="common/runtime/time.h" />
+    <File Path="runtime/src/timeint.h" />
+  </Folder>
+  <Folder Name="/runtime/updateable/">
+    <File Path="common/runtime/IUpdateable.h" />
+  </Folder>
+  <Folder Name="/runtime/window/">
+    <File Path="common/runtime/window.h" />
+  </Folder>
+  <Project Path="SDL3-3.4.16/VisualC/SDL/SDL.vcxproj" Id="81ce8daf-ebb2-4761-8e45-b71abcca8c68" />
+</Solution>
