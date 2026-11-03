@@ -10,6 +10,12 @@
     <Filter Include="core\workflow\d3d11">
       <UniqueIdentifier>{cd0d001a-4b84-49a8-b511-28f3402cd86e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="core\scene">
+      <UniqueIdentifier>{eadf80c1-d6dd-4f18-a95b-b62a395ff421}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\scene\d3d11">
+      <UniqueIdentifier>{2fab95d1-488b-45ab-82f7-3be9233a7342}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\graphicsCore.c">
@@ -20,6 +26,12 @@
     </ClCompile>
     <ClCompile Include="src\d3d11device.cpp">
       <Filter>core\workflow\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="src\scene.cpp">
+      <Filter>core\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\d3d11scene.cpp">
+      <Filter>core\scene\d3d11</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -19,8 +19,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\runtime\schedule.cpp" />
     <ClCompile Include="..\runtime\src\rtdebug.c" />
+    <ClCompile Include="..\runtime\src\schedule.cpp" />
     <ClCompile Include="..\runtime\src\SDL3Window.cpp" />
     <ClCompile Include="..\runtime\src\win32_time.c" />
   </ItemGroup>

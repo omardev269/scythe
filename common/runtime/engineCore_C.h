@@ -32,7 +32,13 @@ struct float2 {
 struct float3 {
 	float32 x, y, z;
 };
-struct float4 {
+#if defined(_MSC_VER)
+struct __declspec(align(16)) float4 {
+#elif defined(__GNUC__) || defined(__clang__) || defined(__TINYC__)
+struct __attribute__((aligned(16))) float4 {
+#else
+#error A 16-byte struct alignment attribute is required for float4
+#endif
 	float32 x, y, z, w;
 };
 struct int2 {
@@ -129,11 +135,11 @@ struct uint4 {
 #define SC_ZMEM(ptr, size) memset(ptr, 0, size)
 
 // Currently uses malloc
-SC_INLINEFUNC void* sc_malloc(size_t aSize) {
+SC_SPECIAL_STATIC void* sc_malloc(size_t aSize) {
 	return malloc(aSize);
 }
 // Currently uses free
-SC_INLINEFUNC void sc_free(void* aPtr) {
+SC_SPECIAL_STATIC void sc_free(void* aPtr) {
 	free(aPtr);
 }
 

@@ -1,7 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\runtime\schedule.cpp" />
     <ClCompile Include="..\runtime\src\SDL3Window.cpp">
       <Filter>window</Filter>
     </ClCompile>
@@ -10,6 +9,9 @@
     </ClCompile>
     <ClCompile Include="..\runtime\src\win32_time.c">
       <Filter>time</Filter>
+    </ClCompile>
+    <ClCompile Include="..\runtime\src\schedule.cpp">
+      <Filter>entrypoint</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -21,6 +23,9 @@
     </Filter>
     <Filter Include="time">
       <UniqueIdentifier>{e10f310c-3f3d-4348-bb9c-e310a2cb5e93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="entrypoint">
+      <UniqueIdentifier>{42bf06eb-2eb0-42ef-a1d8-a14e4756a6c9}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

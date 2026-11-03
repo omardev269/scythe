@@ -6,6 +6,8 @@
 #include <runtime/rtdebug.h>
 #include <string>
 
+#define SC_IFNOTNULLRELEASE(ptr) { if ((ptr)) { (ptr)->Release(); (ptr) = NULL; } }
+
 bool scythe::D3D11GraphicsDevice::Create(Window* apWindow) {
 	{
 		h_Window = NULL;
@@ -65,7 +67,7 @@ bool scythe::D3D11GraphicsDevice::Create(Window* apWindow) {
 		DXGI_ADAPTER_DESC m_AdapterDesc;
 		SC_ZMEM(&m_AdapterDesc, sizeof(DXGI_ADAPTER_DESC));
 		i_DxgiAdapter->GetDesc(&m_AdapterDesc);
-		SC_LOG("VRAM: %f GB (%d KiB)", ((m_AdapterDesc.DedicatedVideoMemory / 1024.0f) / 1024.0f) / 1024.0f, (m_AdapterDesc.DedicatedVideoMemory / 1024));
+		SC_LOG("VRAM: %f GB (%zu KiB)", ((m_AdapterDesc.DedicatedVideoMemory / 1024.0f) / 1024.0f) / 1024.0f, (m_AdapterDesc.DedicatedVideoMemory / 1024));
 		SC_LOG("Using physical device: %ls", m_AdapterDesc.Description);
 		std::wstring m_DescWStr(m_AdapterDesc.Description);
 		m_Warp = m_DescWStr == L"Microsoft Basic Render Driver";
@@ -101,7 +103,6 @@ bool scythe::D3D11GraphicsDevice::Create(Window* apWindow) {
 		m_DepthTextureDesc.ArraySize = 1;
 		m_DepthTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 		m_DepthTextureDesc.SampleDesc.Count = 1;
-		m_DepthTextureDesc.Usage = D3D11_USAGE_DEFAULT;
 		m_DepthTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 		ID3D11Texture2D* i_DepthTexture = NULL;
 		SC_RET_SMART_CHECK(SUCCEEDED(i_Device->CreateTexture2D(&m_DepthTextureDesc, NULL, &i_DepthTexture)), "Depth texture creation failed");
@@ -120,7 +121,6 @@ bool scythe::D3D11GraphicsDevice::Create(Window* apWindow) {
 	{
 		D3D11_DEPTH_STENCIL_DESC m_DssDisabledDesc;
 		SC_ZMEM(&m_DssDisabledDesc, sizeof(D3D11_DEPTH_STENCIL_DESC));
-		m_DssDisabledDesc.DepthEnable = FALSE;
 		SC_RET_SMART_CHECK(SUCCEEDED(i_Device->CreateDepthStencilState(&m_DssDisabledDesc, &i_DepthStencilStateDisabled)), "Depth stencil state creation failed");
 	}
 	{
@@ -135,8 +135,45 @@ bool scythe::D3D11GraphicsDevice::Create(Window* apWindow) {
 }
 
 namespace scythe {
-	SC_SPECIAL_STATIC void ReconsiderSwapchain(D3D11GraphicsDevice* apDevice) {
-
+	// context must be locked when called
+	SC_SPECIAL_STATIC void ReconsiderSwapchain(IDXGISwapChain** piSwapchain, IDXGIFactory* aiDxgiFactory, ID3D11Device* aiDevice, HWND ahWindow) {
+		SC_IFNOTNULLRELEASE(*piSwapchain);
+		DXGI_SWAP_CHAIN_DESC m_SwapchainDesc;
+		SC_ZMEM(&m_SwapchainDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
+		// a lot of stuff in BufferDesc can be automatically filled by the system
+		m_SwapchainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		m_SwapchainDesc.OutputWindow = ahWindow; // fills for us the width and height of the window
+		m_SwapchainDesc.SampleDesc.Count = 1;
+		m_SwapchainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+		m_SwapchainDesc.Windowed = TRUE;
+		m_SwapchainDesc.BufferCount = 1;
+		SC_SMART_CHECK(SUCCEEDED(aiDxgiFactory->CreateSwapChain(aiDevice, &m_SwapchainDesc, piSwapchain)), "Failed to create a swapchain");
+	}
+	SC_SPECIAL_STATIC void ReconsiderRenderTargetView(ID3D11RenderTargetView** piRtv, ID3D11Device* aiDevice, IDXGISwapChain* aiSwapchain) {
+		SC_IFNOTNULLRELEASE(*piRtv);
+		ID3D11Texture2D* i_DxgiTexture;
+		SC_SMART_CHECK(SUCCEEDED(aiSwapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&i_DxgiTexture)), "DXGI RTO texture recieval failed");
+		SC_SMART_CHECK(SUCCEEDED(aiDevice->CreateRenderTargetView(i_DxgiTexture, NULL, piRtv)), "Main RTV creation failed");
+		i_DxgiTexture->Release();
+	}
+	SC_SPECIAL_STATIC void ReconsiderDepthStencilView(ID3D11DepthStencilView** piDsv, ID3D11Device* aiDevice, HWND ahWindow) {
+		SC_IFNOTNULLRELEASE(*piDsv);
+		RECT m_WindowRect;
+		GetClientRect(ahWindow, &m_WindowRect);
+		D3D11_TEXTURE2D_DESC m_DepthTextureDesc;
+		SC_ZMEM(&m_DepthTextureDesc, sizeof(D3D11_TEXTURE2D_DESC));
+		m_DepthTextureDesc.Width = (uint32)(m_WindowRect.right - m_WindowRect.left);
+		m_DepthTextureDesc.Height = (uint32)(m_WindowRect.bottom - m_WindowRect.top);
+		m_DepthTextureDesc.MipLevels = 1;
+		m_DepthTextureDesc.ArraySize = 1;
+		m_DepthTextureDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		m_DepthTextureDesc.SampleDesc.Count = 1;
+		m_DepthTextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+		ID3D11Texture2D* i_DepthTexture = NULL;
+		SC_SMART_CHECK(SUCCEEDED(aiDevice->CreateTexture2D(&m_DepthTextureDesc, NULL, &i_DepthTexture)), "Depth texture creation failed");
+		HRESULT m_DepthStencilViewResult = aiDevice->CreateDepthStencilView(i_DepthTexture, NULL, piDsv);
+		i_DepthTexture->Release();
+		SC_SMART_CHECK(SUCCEEDED(m_DepthStencilViewResult), "Depth stencil view creation failed");
 	}
 }
 
@@ -155,11 +192,6 @@ void scythe::D3D11GraphicsDevice::DisownContext(SpecialContextLock& aLock) {
 void scythe::D3D11GraphicsDevice::BeginFrame() {
 	{
 		SpecialContextLock m_Lock = OwnContext();
-		m_Lock.i_DeviceContext->OMSetRenderTargets(1, &i_MasterRenderTargetView, i_DepthStencilView);
-		m_Lock.i_DeviceContext->RSSetState(i_RasterizerState);
-		m_Lock.i_DeviceContext->ClearRenderTargetView(i_MasterRenderTargetView, &m_ClearColor.x);
-		m_Lock.i_DeviceContext->ClearDepthStencilView(i_DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-		m_Lock.i_DeviceContext->OMSetDepthStencilState(i_DepthStencilStateEnabled, 0);
 		// check if the window size has changed
 		{
 			RECT m_WindowRect;
@@ -175,10 +207,17 @@ void scythe::D3D11GraphicsDevice::BeginFrame() {
 				}
 				else {
 					SC_LOG("Window size changed");
-					ReconsiderSwapchain(this);
+					ReconsiderSwapchain(&i_Swapchain, i_DxgiFactory, i_Device, h_Window);
+					ReconsiderRenderTargetView(&i_MasterRenderTargetView, i_Device, i_Swapchain);
+					ReconsiderDepthStencilView(&i_DepthStencilView, i_Device, h_Window);
 				}
 			}
 		}
+		m_Lock.i_DeviceContext->OMSetRenderTargets(1, &i_MasterRenderTargetView, i_DepthStencilView);
+		m_Lock.i_DeviceContext->RSSetState(i_RasterizerState);
+		m_Lock.i_DeviceContext->ClearRenderTargetView(i_MasterRenderTargetView, &m_ClearColor.x);
+		m_Lock.i_DeviceContext->ClearDepthStencilView(i_DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+		m_Lock.i_DeviceContext->OMSetDepthStencilState(i_DepthStencilStateEnabled, 0);
 		m_Lock.i_DeviceContext->RSSetViewports(1, &m_Viewport);
 		DisownContext(m_Lock);
 	}
@@ -187,8 +226,6 @@ void scythe::D3D11GraphicsDevice::BeginFrame() {
 void scythe::D3D11GraphicsDevice::EndFrame() {
 	SC_SMART_CHECK(SUCCEEDED(i_Swapchain->Present(0, 0)), "Failed to present the swapchain");
 }
-
-#define SC_IFNOTNULLRELEASE(ptr) { if (ptr) { ptr->Release(); ptr = NULL; } }
 
 void scythe::D3D11GraphicsDevice::Dismiss() {
 	SC_IFNOTNULLRELEASE(i_RasterizerState);

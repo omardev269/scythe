@@ -1,7 +1,7 @@
 // BismIllahIRRahmaanIRRaheem
 /* device class loader */
 
-#include <graphics/IDevice.h>
+#include <graphics/IGraphicsDevice.h>
 #include <runtime/rtdebug.h>
 #ifdef SC_ALLOW_D3D11
 #include <d3d11device.h>

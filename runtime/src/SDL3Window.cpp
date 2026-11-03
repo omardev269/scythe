@@ -20,7 +20,7 @@ bool scythe::Window::Create(const char* aTitle, uint2 aWindowSize) {
 	p_Internal->p_Window = NULL;
 	// OpenGL context stuff takes approx 100 MBs of RAM - on windows we should disable it
 #ifdef SC_WINDOWS
-	p_Internal->p_Window = SDL_CreateWindow(aTitle, aWindowSize.x, aWindowSize.y, 0);
+	p_Internal->p_Window = SDL_CreateWindow(aTitle, aWindowSize.x, aWindowSize.y, SDL_WINDOW_RESIZABLE);
 #else
 	p_Internal->p_Window = SDL_CreateWindow(aTitle, aWindowSize.x, aWindowSize.y, SDL_WINDOW_OPENGL);
 #endif // SC_WINDOWS

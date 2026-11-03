@@ -28,8 +28,7 @@ void sc_init_time() {
 	LARGE_INTEGER m_Start;
 	QueryPerformanceFrequency(&m_Frequency);
 	QueryPerformanceCounter(&m_Start);
-	sc_time_seconds_per_tick = (largefloat)1.0f /
-		sc_time_ticks_to_float((uint32)m_Frequency.HighPart, (uint32)m_Frequency.LowPart);
+	sc_time_seconds_per_tick = (largefloat)1.0f / sc_time_ticks_to_float((uint32)m_Frequency.HighPart, (uint32)m_Frequency.LowPart);
 	sc_time_start_low = (uint32)m_Start.LowPart;
 	sc_time_start_high = (uint32)m_Start.HighPart;
 }

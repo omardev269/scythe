@@ -3,7 +3,7 @@
 
 #ifndef SC_D3D11_DEVICE_H
 #define SC_D3D11_DEVICE_H
-#include <graphics/IDevice.h>
+#include <graphics/IGraphicsDevice.h>
 #ifdef SC_ALLOW_D3D11
 #include <d3d11.h>
 #include <mutex>

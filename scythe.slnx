@@ -9,8 +9,14 @@
   <Folder Name="/graphics/core/">
     <File Path="common/graphics/graphicsCore.h" />
   </Folder>
+  <Folder Name="/graphics/core/scene/">
+    <File Path="common/graphics/IGraphicsScene.h" />
+  </Folder>
+  <Folder Name="/graphics/core/scene/d3d11/">
+    <File Path="graphics/src/d3d11scene.h" />
+  </Folder>
   <Folder Name="/graphics/core/workflow/">
-    <File Path="common/graphics/IDevice.h" />
+    <File Path="common/graphics/IGraphicsDevice.h" />
   </Folder>
   <Folder Name="/graphics/core/workflow/d3d11/">
     <File Path="graphics/src/d3d11device.h" />
