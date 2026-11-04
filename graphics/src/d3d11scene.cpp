@@ -4,7 +4,7 @@
 #include <d3d11scene.h>
 #ifdef SC_ALLOW_D3D11
 #include <runtime/rtdebug.h>
-#include <climits>
+#include <gb_math.h>
 
 #define SC_IFNOTNULLRELEASE(ptr) { if ((ptr)) { (ptr)->Release(); (ptr) = NULL; } }
 
@@ -75,8 +75,14 @@ static const uint32 g_PixelShaderBytecodeAlbedo[] = { 1128421444u, 1375268566u, 
 15u, 1415534163u, 1162302017u, 2880110676u, };
 
 #define SC_RET_SMART_CHECK_DISMISS(expr, error) { if (!(expr)) { Dismiss(); SC_LOG("%s", error); return false; } }
+#define SC_RET_SMART_CHECK_DISMISS_ND11GS(expr, error) { if (!(expr)) { h_Lock.unlock(); Dismiss(); SC_LOG("%s", error); return false; } }
+#define SC_CREATE_AND_ZERO(type, name) type name; SC_ZMEM(&name, sizeof(type));
+
+// call this only when modifying class state
+#define SC_ARM_D11GS_LOCK() std::unique_lock h_Lock(h_GeneralMutex)
 
 bool scythe::D3D11GraphicsScene::Create(IGraphicsDevice* aiGraphicsDevice) {
+	SC_ARM_D11GS_LOCK();
 	i_GraphicsDevice = static_cast<D3D11GraphicsDevice*>(aiGraphicsDevice);
 	i_AlbedoConstantBuffer = NULL;
 	i_AlbedoPixelShader = NULL;
@@ -85,10 +91,110 @@ bool scythe::D3D11GraphicsScene::Create(IGraphicsDevice* aiGraphicsDevice) {
 	i_WhiteSampler = NULL;
 	i_WhiteTexture = NULL;
 	i_WhiteTextureSRV = NULL;
-	SC_RET_SMART_CHECK_DISMISS(false, "Not implemented yet");
+	// albedo constant buffer creation
+	{
+		SC_CREATE_AND_ZERO(D3D11_BUFFER_DESC, m_ConstantBufferDesc);
+		m_ConstantBufferDesc.ByteWidth = sizeof(matrix4x4);
+		m_ConstantBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
+		m_ConstantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+		m_ConstantBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+		SC_RET_SMART_CHECK_DISMISS_ND11GS(SUCCEEDED(i_GraphicsDevice->GetDevice()->CreateBuffer(&m_ConstantBufferDesc, NULL, &i_AlbedoConstantBuffer)), "Failed to create albedo constant buffer");
+	}
+	// albedo shader creation
+	SC_RET_SMART_CHECK_DISMISS_ND11GS(SUCCEEDED(i_GraphicsDevice->GetDevice()->CreateVertexShader(g_VertexShaderBytecodeAlbedo, sizeof(g_VertexShaderBytecodeAlbedo), NULL, &i_AlbedoVertexShader)), "Failed to create albedo vertex shader");
+	SC_RET_SMART_CHECK_DISMISS_ND11GS(SUCCEEDED(i_GraphicsDevice->GetDevice()->CreatePixelShader(g_PixelShaderBytecodeAlbedo, sizeof(g_PixelShaderBytecodeAlbedo), NULL, &i_AlbedoPixelShader)), "Failed to create albedo pixel shader");
+	// albedo input layout creation
+	{
+		D3D11_INPUT_ELEMENT_DESC m_InputElementDesc[2];
+		SC_ZMEM(&m_InputElementDesc, sizeof(m_InputElementDesc));
+		m_InputElementDesc[0].SemanticName = "POSITION";
+		m_InputElementDesc[0].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+		m_InputElementDesc[0].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+		m_InputElementDesc[1].SemanticName = "TEXCOORD";
+		m_InputElementDesc[1].Format = DXGI_FORMAT_R32G32_FLOAT;
+		m_InputElementDesc[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+		SC_RET_SMART_CHECK_DISMISS_ND11GS(SUCCEEDED(i_GraphicsDevice->GetDevice()->CreateInputLayout(m_InputElementDesc, 2, g_VertexShaderBytecodeAlbedo, sizeof(g_VertexShaderBytecodeAlbedo), &i_InputLayout)), "Failed to create albedo input layout");
+	}
+	// white texture creation
+	{
+		SC_CREATE_AND_ZERO(D3D11_TEXTURE2D_DESC, m_WhiteTextureDesc);
+		m_WhiteTextureDesc.Width = 1;
+		m_WhiteTextureDesc.Height = 1;
+		m_WhiteTextureDesc.MipLevels = 1;
+		m_WhiteTextureDesc.ArraySize = 1;
+		m_WhiteTextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		m_WhiteTextureDesc.SampleDesc.Count = 1;
+		m_WhiteTextureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		uint32 m_WhitePixelData = 0xFFFFFFFF; // R255	G255	B255	A255
+		D3D11_SUBRESOURCE_DATA m_WhiteSubresourceData;
+		SC_ZMEM(&m_WhiteSubresourceData, sizeof(D3D11_SUBRESOURCE_DATA));
+		m_WhiteSubresourceData.pSysMem = &m_WhitePixelData;
+		m_WhiteSubresourceData.SysMemPitch = sizeof(uint32);
+		SC_RET_SMART_CHECK_DISMISS_ND11GS(SUCCEEDED(i_GraphicsDevice->GetDevice()->CreateTexture2D(&m_WhiteTextureDesc, &m_WhiteSubresourceData, &i_WhiteTexture)), "Failed to create white texture");
+	}
+	// white texture shader resource view creation
+	SC_RET_SMART_CHECK_DISMISS_ND11GS(SUCCEEDED(i_GraphicsDevice->GetDevice()->CreateShaderResourceView(i_WhiteTexture, NULL, &i_WhiteTextureSRV)), "Failed to create white texture SRV");
+	// white sampler creation
+	{
+		SC_CREATE_AND_ZERO(D3D11_SAMPLER_DESC, m_WhiteSamplerDesc);
+		m_WhiteSamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+		m_WhiteSamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+		m_WhiteSamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+		m_WhiteSamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+		m_WhiteSamplerDesc.MinLOD = 0;
+		m_WhiteSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+		SC_RET_SMART_CHECK_DISMISS_ND11GS(SUCCEEDED(i_GraphicsDevice->GetDevice()->CreateSamplerState(&m_WhiteSamplerDesc, &i_WhiteSampler)), "Failed to create white sampler");
+	}
+	return true;
 }
 
+#undef SC_RETURN_ON_FAILURE
+#define SC_RETURN_ON_FAILURE { 0 }
+
+scythe::ObjectID scythe::D3D11GraphicsScene::CreateObject(ulargeint aVertexBufferBytes, ulargeint aIndexBufferBytes, uint32 aStride) {
+	ID3D11Buffer *i_VertexBuffer, *i_IndexBuffer;
+	// vbuf
+	{
+		SC_CREATE_AND_ZERO(D3D11_BUFFER_DESC, m_BufferDesc);
+		m_BufferDesc.ByteWidth = aVertexBufferBytes;
+		m_BufferDesc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		SC_RET_SMART_CHECK(SUCCEEDED(i_GraphicsDevice->GetDevice()->CreateBuffer(&m_BufferDesc, NULL, &i_VertexBuffer)), "Vertex buffer creation failed");
+	}
+	// ibuf
+	{
+		SC_CREATE_AND_ZERO(D3D11_BUFFER_DESC, m_BufferDesc);
+		m_BufferDesc.ByteWidth = aIndexBufferBytes;
+		m_BufferDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+		SC_RET_SMART_CHECK(SUCCEEDED(i_GraphicsDevice->GetDevice()->CreateBuffer(&m_BufferDesc, NULL, &i_IndexBuffer)), "Index buffer creation failed");
+	}
+	D3D11Object* p_D3D11Object = new D3D11Object;
+	p_D3D11Object->m_Stride = aStride; // we need to know this when setting the vertex buffer
+	p_D3D11Object->m_VertexBufferBytes = aVertexBufferBytes; // -
+	p_D3D11Object->m_IndexBufferBytes = aIndexBufferBytes; // for updating with a higher size and stuff
+	p_D3D11Object->i_IndexBuffer = i_IndexBuffer;
+	p_D3D11Object->i_VertexBuffer = i_VertexBuffer;
+	SC_ARM_D11GS_LOCK();
+	m_Objects.push_back(p_D3D11Object);
+	return { m_Objects.size() }; // 0 should mean an issue
+}
+#undef SC_RETURN_ON_FAILURE
+#define SC_RETURN_ON_FAILURE { 0, 0 }
+scythe::ClumpID scythe::D3D11GraphicsScene::CreateClump(const scythe::CLUMP_METADATA& aMetadata, float32* apVertexStartData, uint16* apIndexStartData) {
+	SC_RET_SMART_CHECK(aMetadata.Parent.ID != 0, "Clump parent ID is 0");
+	D3D11Object* p_Object;
+	{
+		SC_ARM_D11GS_LOCK();
+		SC_RET_SMART_CHECK(m_Objects.size() >= aMetadata.Parent.ID, "Clump parent ID is invalid - higher than the size of the object vector");
+		p_Object = m_Objects[aMetadata.Parent.ID - 1];
+		SC_RET_SMART_CHECK(p_Object != NULL, "Clump parent ID is invalid (NULL case)")
+	}
+
+}
+#undef SC_RETURN_ON_FAILURE
+#define SC_RETURN_ON_FAILURE false
 void scythe::D3D11GraphicsScene::Dismiss() {
+	SC_SMART_CHECK(h_GeneralMutex.try_lock(), "Thread is competing on an expired gscene!");
+	h_GeneralMutex.unlock();
 	SC_IFNOTNULLRELEASE(i_AlbedoConstantBuffer);
 	SC_IFNOTNULLRELEASE(i_AlbedoPixelShader);
 	SC_IFNOTNULLRELEASE(i_AlbedoVertexShader);

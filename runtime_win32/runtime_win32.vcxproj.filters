@@ -13,6 +13,9 @@
     <ClCompile Include="..\runtime\src\schedule.cpp">
       <Filter>entrypoint</Filter>
     </ClCompile>
+    <ClCompile Include="..\runtime\src\deps.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="debug">
@@ -26,6 +29,9 @@
     </Filter>
     <Filter Include="entrypoint">
       <UniqueIdentifier>{42bf06eb-2eb0-42ef-a1d8-a14e4756a6c9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="deps">
+      <UniqueIdentifier>{32e5c4e2-7af1-4f8a-b536-ce1686b855ec}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

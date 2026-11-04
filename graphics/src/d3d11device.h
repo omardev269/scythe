@@ -46,6 +46,7 @@ namespace scythe {
 		void EndFrame() override;
 		void Dismiss() override;
 		// --NON-VIRTUAL FUNCTIONS
+		SC_INLINEFUNC ID3D11Device* GetDevice() { return i_Device; };
 		SpecialContextLock OwnContext();
 		void DisownContext(SpecialContextLock& aLock);
 		SC_INLINEFUNC bool IsWarp() const { return m_Warp; };

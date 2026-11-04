@@ -57,12 +57,17 @@ void sc_debug_break();
 
 // The RET* set of macros are used to return false if the expression is not true mostly for factory functions
 
+// to be dynamically changed
+#define SC_RETURN_ON_FAILURE false
+
 #ifdef SC_RELEASE
-#define SC_RET_CHECK(expr, error) { if (!(expr)) { return false; }}
-#define SC_RET_SMART_CHECK(expr, error) { if (!(expr)) { return false; }}
+#define SC_RET_ASSERT(expr, error) (void)expr, (void)error
+#define SC_RET_CHECK(expr, error) { if (!(expr)) { return SC_RETURN_ON_FAILURE; }}
+#define SC_RET_SMART_CHECK(expr, error) { if (!(expr)) { return SC_RETURN_ON_FAILURE; }}
 #else
-#define SC_RET_ASSERT(expr, error) { if (!(expr)) { SC_LOG("%s caused this: %s", #expr, error); return false; }}
-#define SC_RET_SMART_CHECK(expr, error) { if (!(expr)) { SC_LOG("%s caused this: %s", #expr, error); return false; }}
+#define SC_RET_CHECK(expr, error) (void)expr, (void)error
+#define SC_RET_ASSERT(expr, error) { if (!(expr)) { SC_LOG("%s caused this: %s", #expr, error); return SC_RETURN_ON_FAILURE; }}
+#define SC_RET_SMART_CHECK(expr, error) { if (!(expr)) { SC_LOG("%s caused this: %s", #expr, error); return SC_RETURN_ON_FAILURE; }}
 #endif // SC_RELEASE
 
 

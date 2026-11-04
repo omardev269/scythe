@@ -29,26 +29,28 @@ namespace scythe
 	struct IGraphicsScene {
 		virtual bool Create(IGraphicsDevice* aiGraphicsDevice) = 0;
 		virtual ObjectID CreateObject(ulargeint aVertexBufferBytes, ulargeint aIndexBufferBytes, uint32 aStride) = 0;
-		virtual ClumpID CreateClump(CLUMP_METADATA aMetadata, float32* apVertexStartData, uint16* apIndexStartData) = 0;
-		virtual void UpdateClump(ClumpID aClump, matrix4x4 aTransform) = 0;
+		virtual ClumpID CreateClump(const CLUMP_METADATA& aMetadata, float32* apVertexStartData, uint16* apIndexStartData) = 0;
+		virtual void UpdateClump(ClumpID aClump, const matrix4x4& aTransform) = 0;
 		//virtual void UpdateClump(ClumpID aClump, IMaterial* aiMaterial) = 0;
 		virtual void UpdateClumpNumVertices(ClumpID aClump, uint16 aNumVertices) = 0;
 		virtual void UpdateClumpNumIndices(ClumpID aClump, uint32 aNumIndices) = 0;
 		virtual void UpdateClump(ClumpID aClump, float32* apVertexData, ulargeint aCurrentAttemptedAllocationSize) = 0;
 		virtual void UpdateClump(ClumpID aClump, uint16* apIndexData, ulargeint aCurrentAttemptedAllocationSize) = 0;
-		virtual void AlbedoRenderExcept(ObjectID aObject, matrix4x4 aPV) = 0;
+		virtual void AlbedoRenderExcept(ObjectID aObject, const matrix4x4& aPV) = 0;
 		virtual IGraphicsDevice* GetParent() = 0;
 		virtual void DismissClump(ClumpID& aClump) = 0;
 		virtual void DismissObject(ObjectID aObject) = 0;
-		virtual void AlbedoRenderExcept(matrix4x4 aPV, ObjectID aObject) = 0;
-		virtual void AlbedoRenderExcept(matrix4x4 aPV, ObjectID aObject, ClumpID aClump) = 0;
-		virtual void AlbedoRenderExcept(matrix4x4 aPV, ClumpID aClump) = 0;
-		virtual void AlbedoRender(matrix4x4 aPV, ClumpID aClump) = 0;
-		virtual void AlbedoRender(matrix4x4 aPV, ObjectID aObject) = 0;
-		virtual void AlbedoRender(matrix4x4 aPV) = 0;
+		virtual void AlbedoRenderExcept(const matrix4x4& aPV, ObjectID aObject) = 0;
+		virtual void AlbedoRenderExcept(const matrix4x4& aPV, ObjectID aObject, ClumpID aClump) = 0;
+		virtual void AlbedoRenderExcept(const matrix4x4& aPV, ClumpID aClump) = 0;
+		virtual void AlbedoRender(const matrix4x4& aPV, ClumpID aClump) = 0;
+		virtual void AlbedoRender(const matrix4x4& aPV, ObjectID aObject) = 0;
+		virtual void AlbedoRender(const matrix4x4& aPV) = 0;
 		// TODO
 		//virtual void EnumerateObjects(std::vector<ObjectID>& oObjects) = 0;
 		//virtual void EnumerateClumps(ObjectID aObject, std::vector<ClumpID>& oClumps) = 0;
+
+		// Make sure that you join all threads using the scene before dismissing this class
 		virtual void Dismiss() = 0;
 	};
 	void CreateGraphicsScene(IGraphicsScene*& oiGraphicsScene, IGraphicsDevice* aiGraphicsDevice);
