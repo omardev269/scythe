@@ -171,6 +171,7 @@
     <ClCompile Include="src\d3d11device.cpp" />
     <ClCompile Include="src\d3d11scene.cpp" />
     <ClCompile Include="src\device.cpp" />
+    <ClCompile Include="src\freeflycam.cpp" />
     <ClCompile Include="src\graphicsCore.c" />
     <ClCompile Include="src\scene.cpp" />
   </ItemGroup>

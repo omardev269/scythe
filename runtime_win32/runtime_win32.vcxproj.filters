@@ -16,6 +16,9 @@
     <ClCompile Include="..\runtime\src\deps.cpp">
       <Filter>deps</Filter>
     </ClCompile>
+    <ClCompile Include="..\game\src\game.cpp">
+      <Filter>game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="debug">
@@ -32,6 +35,9 @@
     </Filter>
     <Filter Include="deps">
       <UniqueIdentifier>{32e5c4e2-7af1-4f8a-b536-ce1686b855ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game">
+      <UniqueIdentifier>{98064827-ffa7-4b69-9cec-a160878c3796}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

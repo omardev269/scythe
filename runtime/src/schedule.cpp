@@ -3,11 +3,17 @@
 
 #include <runtime/engineCore.h>
 #include <runtime/window.h>
-#include <runtime/rtdebug.h>
+#include <runtime/rtdebug.h> 
+#include <runtime/game.h>
 #include <graphics/IGraphicsDevice.h>
-#include <graphics/IGraphicsScene.h>
 #include <timeint.h>
 #include <stdio.h>
+namespace scythe {
+	inline Window* g_pWindow;
+	inline IGraphicsDevice* g_iGraphicsDevice;
+	inline largefloat g_DeltaTime;
+	static largefloat g_LastDtPoll;
+}
 #ifdef SC_WINDOWS
 #if defined(_UNICODE) || defined(UNICODE)
 int WINAPI wWinMain(
@@ -31,59 +37,36 @@ int main(
 ) {
 #endif // SC_WINDOWS
 	sc_init_time();
-	scythe::Window* p_Window = NULL;
-	scythe::CreateWindowClass(p_Window, "BismIllahIRRahmaanIRRaheem", { 800, 600 });
-	if (!p_Window) {
+	scythe::g_LastDtPoll = sc_get_time_not_since_engine_startup();
+	scythe::g_DeltaTime = 0;
+	scythe::g_pWindow = NULL;
+	scythe::CreateWindowClass(scythe::g_pWindow, "BismIllahIRRahmaanIRRaheem", { 800, 600 });
+	if (!scythe::g_pWindow) {
 		sc_deinit_time();
 		return 1;
 	}
-	scythe::IGraphicsDevice* i_Device = NULL;
-	scythe::CreateGraphicsDevice(i_Device, p_Window);
-	if (!i_Device) {
-		p_Window->Dismiss();
+	scythe::g_iGraphicsDevice = NULL;
+	scythe::CreateGraphicsDevice(scythe::g_iGraphicsDevice, scythe::g_pWindow);
+	if (!scythe::g_iGraphicsDevice) {
+		scythe::g_pWindow->Dismiss();
 		sc_deinit_time();
 		return 1;
 	}
-	scythe::IGraphicsScene* i_Scene = NULL;
-	scythe::CreateGraphicsScene(i_Scene, i_Device);
-	if (!i_Scene) {
-		i_Device->Dismiss();
-		p_Window->Dismiss();
-		sc_deinit_time();
-		return 1;
+	start_game();
+	while (true) {
+		scythe::g_pWindow->PollEvents();
+		scythe::g_iGraphicsDevice->BeginFrame();
+		if (!update_game()) {
+			break;
+		}
+		scythe::g_iGraphicsDevice->EndFrame();
+		largefloat m_TempPoll = sc_get_time_not_since_engine_startup();
+		scythe::g_DeltaTime = m_TempPoll - scythe::g_LastDtPoll;
+		scythe::g_LastDtPoll = m_TempPoll;
 	}
-	float32 a_Vertices[] = {
-		 0.0f,  0.5f, 0.5f, 0.5f, 0.0f,
-		 0.5f, -0.5f, 0.5f, 1.0f, 1.0f,
-		-0.5f, -0.5f, 0.5f, 0.0f, 1.0f
-	};
-	uint16 a_Indices[] = { 0, 1, 2 };
-	matrix4x4 m_Identity = {{
-		1.0f, 0.0f, 0.0f, 0.0f,
-		0.0f, 1.0f, 0.0f, 0.0f,
-		0.0f, 0.0f, 1.0f, 0.0f,
-		0.0f, 0.0f, 0.0f, 1.0f
-	}};
-	scythe::ObjectID m_Object = i_Scene->CreateObject(sizeof(a_Vertices), sizeof(a_Indices), 5 * sizeof(float32));
-	scythe::CLUMP_METADATA m_Metadata = {};
-	m_Metadata.Parent = m_Object;
-	m_Metadata.Transform = m_Identity;
-	m_Metadata.NumVertexBufferBytes = sizeof(a_Vertices);
-	m_Metadata.NumIndexBufferBytes = sizeof(a_Indices);
-	m_Metadata.NumVertices = 3;
-	m_Metadata.NumIndices = 3;
-	scythe::ClumpID m_Clump = i_Scene->CreateClump(m_Metadata, a_Vertices, a_Indices);
-	while (!p_Window->ShouldClose()) {
-		p_Window->PollEvents();
-		i_Device->BeginFrame();
-		i_Scene->AlbedoRender(m_Identity, m_Clump);
-		i_Device->EndFrame();
-	}
-	i_Scene->DismissClump(m_Clump);
-	i_Scene->DismissObject(m_Object);
-	SC_IFNOTNULLDISMISS(i_Scene);
-	SC_IFNOTNULLDISMISS(p_Window);
-	SC_IFNOTNULLDISMISS(i_Device); // many drivers need the window to be invalid before the swapchain is released
+	end_game();
+	SC_IFNOTNULLDISMISS(scythe::g_pWindow);
+	SC_IFNOTNULLDISMISS(scythe::g_iGraphicsDevice); // many drivers need the window to be invalid before the swapchain is released
 	// the time subsystem is responsible for checking its state so we don't check anything to call it
 	sc_deinit_time();
 	return 0;

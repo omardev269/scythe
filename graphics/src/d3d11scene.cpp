@@ -75,22 +75,23 @@ static const uint32 g_PixelShaderBytecodeAlbedo[] = { 1128421444u, 1375268566u, 
 15u, 1415534163u, 1162302017u, 2880110676u, };
 
 #define SC_RET_SMART_CHECK_DISMISS(expr, error) { if (!(expr)) { Dismiss(); SC_LOG("%s", error); return false; } }
-#define SC_RET_SMART_CHECK_DISMISS_ND11GS(expr, error) { if (!(expr)) { h_Lock.unlock(); Dismiss(); SC_LOG("%s", error); return false; } }
 #define SC_CREATE_AND_ZERO(type, name) type name; SC_ZMEM(&name, sizeof(type));
 
 // call this only when modifying class state
 #define SC_ARM_D11GS_LOCK() std::unique_lock h_Lock(h_GeneralMutex)
 
 bool scythe::D3D11GraphicsScene::Create(IGraphicsDevice* aiGraphicsDevice) {
-	SC_ARM_D11GS_LOCK();
-	i_GraphicsDevice = static_cast<D3D11GraphicsDevice*>(aiGraphicsDevice);
-	i_AlbedoConstantBuffer = NULL;
-	i_AlbedoPixelShader = NULL;
-	i_AlbedoVertexShader = NULL;
-	i_InputLayout = NULL;
-	i_WhiteSampler = NULL;
-	i_WhiteTexture = NULL;
-	i_WhiteTextureSRV = NULL;
+	{
+		SC_ARM_D11GS_LOCK();
+		i_GraphicsDevice = static_cast<D3D11GraphicsDevice*>(aiGraphicsDevice);
+		i_AlbedoConstantBuffer = NULL;
+		i_AlbedoPixelShader = NULL;
+		i_AlbedoVertexShader = NULL;
+		i_InputLayout = NULL;
+		i_WhiteSampler = NULL;
+		i_WhiteTexture = NULL;
+		i_WhiteTextureSRV = NULL;
+	}
 	// albedo constant buffer creation
 	{
 		SC_CREATE_AND_ZERO(D3D11_BUFFER_DESC, m_ConstantBufferDesc);
@@ -98,11 +99,24 @@ bool scythe::D3D11GraphicsScene::Create(IGraphicsDevice* aiGraphicsDevice) {
 		m_ConstantBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 		m_ConstantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 		m_ConstantBufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-		SC_RET_SMART_CHECK_DISMISS_ND11GS(SUCCEEDED(i_GraphicsDevice->GetDevice()->CreateBuffer(&m_ConstantBufferDesc, NULL, &i_AlbedoConstantBuffer)), "Failed to create albedo constant buffer");
+		ID3D11Buffer* i_NewBuffer = NULL;
+		SC_RET_SMART_CHECK_DISMISS(SUCCEEDED(i_GraphicsDevice->GetDevice()->CreateBuffer(&m_ConstantBufferDesc, NULL, &i_NewBuffer)), "Failed to create albedo constant buffer");
+		SC_ARM_D11GS_LOCK();
+		i_AlbedoConstantBuffer = i_NewBuffer;
 	}
 	// albedo shader creation
-	SC_RET_SMART_CHECK_DISMISS_ND11GS(SUCCEEDED(i_GraphicsDevice->GetDevice()->CreateVertexShader(g_VertexShaderBytecodeAlbedo, sizeof(g_VertexShaderBytecodeAlbedo), NULL, &i_AlbedoVertexShader)), "Failed to create albedo vertex shader");
-	SC_RET_SMART_CHECK_DISMISS_ND11GS(SUCCEEDED(i_GraphicsDevice->GetDevice()->CreatePixelShader(g_PixelShaderBytecodeAlbedo, sizeof(g_PixelShaderBytecodeAlbedo), NULL, &i_AlbedoPixelShader)), "Failed to create albedo pixel shader");
+	{
+		ID3D11VertexShader* i_NewShader = NULL;
+		SC_RET_SMART_CHECK_DISMISS(SUCCEEDED(i_GraphicsDevice->GetDevice()->CreateVertexShader(g_VertexShaderBytecodeAlbedo, sizeof(g_VertexShaderBytecodeAlbedo), NULL, &i_NewShader)), "Failed to create albedo vertex shader");
+		SC_ARM_D11GS_LOCK();
+		i_AlbedoVertexShader = i_NewShader;
+	}
+	{
+		ID3D11PixelShader* i_NewShader = NULL;
+		SC_RET_SMART_CHECK_DISMISS(SUCCEEDED(i_GraphicsDevice->GetDevice()->CreatePixelShader(g_PixelShaderBytecodeAlbedo, sizeof(g_PixelShaderBytecodeAlbedo), NULL, &i_NewShader)), "Failed to create albedo pixel shader");
+		SC_ARM_D11GS_LOCK();
+		i_AlbedoPixelShader = i_NewShader;
+	}
 	// albedo input layout creation
 	{
 		D3D11_INPUT_ELEMENT_DESC m_InputElementDesc[2];
@@ -113,7 +127,10 @@ bool scythe::D3D11GraphicsScene::Create(IGraphicsDevice* aiGraphicsDevice) {
 		m_InputElementDesc[1].SemanticName = "TEXCOORD";
 		m_InputElementDesc[1].Format = DXGI_FORMAT_R32G32_FLOAT;
 		m_InputElementDesc[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
-		SC_RET_SMART_CHECK_DISMISS_ND11GS(SUCCEEDED(i_GraphicsDevice->GetDevice()->CreateInputLayout(m_InputElementDesc, 2, g_VertexShaderBytecodeAlbedo, sizeof(g_VertexShaderBytecodeAlbedo), &i_InputLayout)), "Failed to create albedo input layout");
+		ID3D11InputLayout* i_NewLayout = NULL;
+		SC_RET_SMART_CHECK_DISMISS(SUCCEEDED(i_GraphicsDevice->GetDevice()->CreateInputLayout(m_InputElementDesc, 2, g_VertexShaderBytecodeAlbedo, sizeof(g_VertexShaderBytecodeAlbedo), &i_NewLayout)), "Failed to create albedo input layout");
+		SC_ARM_D11GS_LOCK();
+		i_InputLayout = i_NewLayout;
 	}
 	// white texture creation
 	{
@@ -130,10 +147,18 @@ bool scythe::D3D11GraphicsScene::Create(IGraphicsDevice* aiGraphicsDevice) {
 		SC_ZMEM(&m_WhiteSubresourceData, sizeof(D3D11_SUBRESOURCE_DATA));
 		m_WhiteSubresourceData.pSysMem = &m_WhitePixelData;
 		m_WhiteSubresourceData.SysMemPitch = sizeof(uint32);
-		SC_RET_SMART_CHECK_DISMISS_ND11GS(SUCCEEDED(i_GraphicsDevice->GetDevice()->CreateTexture2D(&m_WhiteTextureDesc, &m_WhiteSubresourceData, &i_WhiteTexture)), "Failed to create white texture");
+		ID3D11Texture2D* i_NewTexture = NULL;
+		SC_RET_SMART_CHECK_DISMISS(SUCCEEDED(i_GraphicsDevice->GetDevice()->CreateTexture2D(&m_WhiteTextureDesc, &m_WhiteSubresourceData, &i_NewTexture)), "Failed to create white texture");
+		SC_ARM_D11GS_LOCK();
+		i_WhiteTexture = i_NewTexture;
 	}
 	// white texture shader resource view creation
-	SC_RET_SMART_CHECK_DISMISS_ND11GS(SUCCEEDED(i_GraphicsDevice->GetDevice()->CreateShaderResourceView(i_WhiteTexture, NULL, &i_WhiteTextureSRV)), "Failed to create white texture SRV");
+	{
+		ID3D11ShaderResourceView* i_NewSRV = NULL;
+		SC_RET_SMART_CHECK_DISMISS(SUCCEEDED(i_GraphicsDevice->GetDevice()->CreateShaderResourceView(i_WhiteTexture, NULL, &i_NewSRV)), "Failed to create white texture SRV");
+		SC_ARM_D11GS_LOCK();
+		i_WhiteTextureSRV = i_NewSRV;
+	}
 	// white sampler creation
 	{
 		SC_CREATE_AND_ZERO(D3D11_SAMPLER_DESC, m_WhiteSamplerDesc);
@@ -143,7 +168,10 @@ bool scythe::D3D11GraphicsScene::Create(IGraphicsDevice* aiGraphicsDevice) {
 		m_WhiteSamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
 		m_WhiteSamplerDesc.MinLOD = 0;
 		m_WhiteSamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-		SC_RET_SMART_CHECK_DISMISS_ND11GS(SUCCEEDED(i_GraphicsDevice->GetDevice()->CreateSamplerState(&m_WhiteSamplerDesc, &i_WhiteSampler)), "Failed to create white sampler");
+		ID3D11SamplerState* i_NewSampler = NULL;
+		SC_RET_SMART_CHECK_DISMISS(SUCCEEDED(i_GraphicsDevice->GetDevice()->CreateSamplerState(&m_WhiteSamplerDesc, &i_NewSampler)), "Failed to create white sampler");
+		SC_ARM_D11GS_LOCK();
+		i_WhiteSampler = i_NewSampler;
 	}
 	return true;
 }
@@ -178,23 +206,87 @@ scythe::ObjectID scythe::D3D11GraphicsScene::CreateObject(ulargeint aVertexBuffe
 	return { m_Objects.size() }; // 0 should mean an issue
 }
 #undef SC_RETURN_ON_FAILURE
+#define SC_RETURN_ON_FAILURE false
+namespace scythe {
+	SC_SPECIAL_STATIC bool CheckObjectStuff(std::vector<D3D11Object*>& aObjectVector, ObjectID aObjectID) {
+		SC_RET_SMART_CHECK(aObjectID.ID != 0, "ObjectID is 0");
+		SC_RET_SMART_CHECK(aObjectVector.size() >= aObjectID.ID, "ObjectID is invalid - higher than the size of the object vector");
+		SC_RET_SMART_CHECK(aObjectVector[aObjectID.ID - 1] != NULL, "ObjectID is invalid (NULL case)");
+		return true;
+	}
+	SC_SPECIAL_STATIC bool CheckClumpStuff(std::vector<ClearClumpD3D11>& aClumpVector, ClumpID aClumpID) {
+		SC_RET_SMART_CHECK(aClumpID.FatherID != 0, "Clump father ID is 0");
+		SC_RET_SMART_CHECK(aClumpID.ID != 0, "Clump ID is 0");
+		SC_RET_SMART_CHECK(aClumpVector.size() >= aClumpID.ID, "Clump ID is invalid - higher than the size of the clump vector");
+		SC_RET_SMART_CHECK(!aClumpVector[aClumpID.ID - 1].Expired, "Clump ID is invalid (expired case)");
+		return true;
+	}
+}
+#define SC_DUMB_PLAIN_RETURN_ON_ERROR(expr) if (!(expr)) { return SC_RETURN_ON_FAILURE; }
+#undef SC_RETURN_ON_FAILURE
 #define SC_RETURN_ON_FAILURE { 0, 0 }
 scythe::ClumpID scythe::D3D11GraphicsScene::CreateClump(const scythe::CLUMP_METADATA& aMetadata, float32* apVertexStartData, uint16* apIndexStartData) {
-	SC_RET_SMART_CHECK(aMetadata.Parent.ID != 0, "Clump parent ID is 0");
 	D3D11Object* p_Object;
+	// checks
 	{
 		SC_ARM_D11GS_LOCK();
-		SC_RET_SMART_CHECK(m_Objects.size() >= aMetadata.Parent.ID, "Clump parent ID is invalid - higher than the size of the object vector");
+		SC_DUMB_PLAIN_RETURN_ON_ERROR(CheckObjectStuff(m_Objects, aMetadata.Parent));
 		p_Object = m_Objects[aMetadata.Parent.ID - 1];
-		SC_RET_SMART_CHECK(p_Object != NULL, "Clump parent ID is invalid (NULL case)")
 	}
-
+	// update buffers
+	{
+		// the context is locked because in D3D11 you can't use 2 contexts in parallel
+		SpecialContextLock h_SpecialLock = i_GraphicsDevice->OwnContext();
+		// update vbuf
+		{
+			SC_CREATE_AND_ZERO(D3D11_BOX, m_Box);
+			m_Box.left = aMetadata.StartVertexBufferBytes;
+			m_Box.right = aMetadata.StartVertexBufferBytes + aMetadata.NumVertexBufferBytes;
+			if (m_Box.right < p_Object->m_VertexBufferBytes) {
+				i_GraphicsDevice->DisownContext(h_SpecialLock);
+				SC_RET_SMART_CHECK(m_Box.right >= p_Object->m_VertexBufferBytes, "Vertex buffer overflow");
+			}
+			m_Box.bottom = 1;
+			m_Box.back = 1;
+			h_SpecialLock.i_DeviceContext->UpdateSubresource(p_Object->i_VertexBuffer, 0, &m_Box, apVertexStartData, 0, 0);
+		}
+		// update ibuf
+		{
+			SC_CREATE_AND_ZERO(D3D11_BOX, m_Box);
+			m_Box.left = aMetadata.StartIndexBufferBytes;
+			m_Box.right = aMetadata.StartIndexBufferBytes + aMetadata.NumIndexBufferBytes;
+			if (m_Box.right < p_Object->m_IndexBufferBytes) {
+				i_GraphicsDevice->DisownContext(h_SpecialLock);
+				SC_RET_SMART_CHECK(m_Box.right >= p_Object->m_IndexBufferBytes, "Index buffer overflow");
+			}
+			m_Box.bottom = 1;
+			m_Box.back = 1;
+			h_SpecialLock.i_DeviceContext->UpdateSubresource(p_Object->i_IndexBuffer, 0, &m_Box, apIndexStartData, 0, 0);
+		}
+		i_GraphicsDevice->DisownContext(h_SpecialLock);
+	}
+	ClearClumpD3D11 m_CClump = { aMetadata, false };
+	SC_ARM_D11GS_LOCK();
+	p_Object->m_Clumps.push_back(m_CClump);
+	return { aMetadata.Parent.ID, p_Object->m_Clumps.size()};
 }
 #undef SC_RETURN_ON_FAILURE
 #define SC_RETURN_ON_FAILURE false
+void scythe::D3D11GraphicsScene::DismissClump(ClumpID& aClump) {
+	ObjectID m_ObjectID = { aClump.FatherID };
+	if (!CheckObjectStuff(m_Objects, m_ObjectID)) return;
+	D3D11Object* p_Object = m_Objects[aClump.FatherID - 1];
+	if (!CheckClumpStuff(p_Object->m_Clumps, aClump)) return;
+	ClearClumpD3D11* p_Clump = &p_Object->m_Clumps[aClump.ID - 1];
+	{
+		SC_ARM_D11GS_LOCK();
+		p_Clump->Expired = true;
+	}
+	aClump.ID = 0;
+	aClump.FatherID = 0;
+}
 void scythe::D3D11GraphicsScene::Dismiss() {
 	SC_SMART_CHECK(h_GeneralMutex.try_lock(), "Thread is competing on an expired gscene!");
-	h_GeneralMutex.unlock();
 	SC_IFNOTNULLRELEASE(i_AlbedoConstantBuffer);
 	SC_IFNOTNULLRELEASE(i_AlbedoPixelShader);
 	SC_IFNOTNULLRELEASE(i_AlbedoVertexShader);
@@ -202,6 +294,157 @@ void scythe::D3D11GraphicsScene::Dismiss() {
 	SC_IFNOTNULLRELEASE(i_WhiteSampler);
 	SC_IFNOTNULLRELEASE(i_WhiteTexture);
 	SC_IFNOTNULLRELEASE(i_WhiteTextureSRV);
+	h_GeneralMutex.unlock();
 	delete this;
 }
+
+// High confidence: clump lookup and updates. Scene state must already be locked.
+namespace scythe {
+	SC_SPECIAL_STATIC ClearClumpD3D11* FindLiveClump(std::vector<D3D11Object*>& aObjects, ClumpID aClump) {
+		ObjectID m_Parent = { aClump.FatherID };
+		if (!CheckObjectStuff(aObjects, m_Parent)) return NULL;
+		D3D11Object* p_Object = aObjects[aClump.FatherID - 1];
+		if (!CheckClumpStuff(p_Object->m_Clumps, aClump)) return NULL;
+		return &p_Object->m_Clumps[aClump.ID - 1];
+	}
+
+	SC_SPECIAL_STATIC bool UploadClumpBytes(D3D11GraphicsDevice* aiDevice, ID3D11Buffer* aiBuffer,
+		ulargeint aStart, ulargeint aAllocation, ulargeint aBytes, const void* apData) {
+		SC_RET_SMART_CHECK(aBytes <= aAllocation, "Clump update exceeds its allocation");
+		if (aBytes == 0) return true;
+		SC_RET_SMART_CHECK(apData != NULL, "Invalid clump update data");
+		D3D11_BUFFER_DESC m_Desc;
+		aiBuffer->GetDesc(&m_Desc);
+		SC_RET_SMART_CHECK(aStart <= m_Desc.ByteWidth && aAllocation <= m_Desc.ByteWidth - aStart,
+			"Clump allocation exceeds its buffer");
+		D3D11_BOX m_Box = {};
+		m_Box.left = static_cast<UINT>(aStart);
+		m_Box.right = static_cast<UINT>(aStart + aBytes);
+		m_Box.bottom = 1;
+		m_Box.back = 1;
+		SpecialContextLock h_Context = aiDevice->OwnContext();
+		h_Context.i_DeviceContext->UpdateSubresource(aiBuffer, 0, &m_Box, apData, 0, 0);
+		aiDevice->DisownContext(h_Context);
+		return true;
+	}
+}
+
+void scythe::D3D11GraphicsScene::UpdateClump(ClumpID aClump, const matrix4x4& aTransform) {
+	ClearClumpD3D11* p_Clump = FindLiveClump(m_Objects, aClump);
+	if (!p_Clump) return;
+	SC_ARM_D11GS_LOCK();
+	p_Clump->Metadata.Transform = aTransform;
+}
+
+void scythe::D3D11GraphicsScene::UpdateClumpNumVertices(ClumpID aClump, uint16 aNumVertices) {
+	ClearClumpD3D11* p_Clump = FindLiveClump(m_Objects, aClump);
+	if (!p_Clump) return;
+	SC_ARM_D11GS_LOCK();
+	p_Clump->Metadata.NumVertices = aNumVertices;
+}
+
+void scythe::D3D11GraphicsScene::UpdateClumpNumIndices(ClumpID aClump, uint32 aNumIndices) {
+	ClearClumpD3D11* p_Clump = FindLiveClump(m_Objects, aClump);
+	if (!p_Clump) return;
+	SC_ARM_D11GS_LOCK();
+	p_Clump->Metadata.NumIndices = aNumIndices;
+}
+
+void scythe::D3D11GraphicsScene::UpdateClump(ClumpID aClump, float32* apVertexData, ulargeint aCurrentAttemptedAllocationSize) {
+	ClearClumpD3D11* p_Clump = FindLiveClump(m_Objects, aClump);
+	if (!p_Clump) return;
+	UploadClumpBytes(i_GraphicsDevice, m_Objects[aClump.FatherID - 1]->i_VertexBuffer,
+		p_Clump->Metadata.StartVertexBufferBytes, p_Clump->Metadata.NumVertexBufferBytes,
+		aCurrentAttemptedAllocationSize, apVertexData);
+}
+
+void scythe::D3D11GraphicsScene::UpdateClump(ClumpID aClump, uint16* apIndexData, ulargeint aCurrentAttemptedAllocationSize) {
+	ClearClumpD3D11* p_Clump = FindLiveClump(m_Objects, aClump);
+	if (!p_Clump) return;
+	UploadClumpBytes(i_GraphicsDevice, m_Objects[aClump.FatherID - 1]->i_IndexBuffer,
+		p_Clump->Metadata.StartIndexBufferBytes, p_Clump->Metadata.NumIndexBufferBytes,
+		aCurrentAttemptedAllocationSize, apIndexData);
+}
+// End high confidence: clump lookup and updates.
+
+// High confidence: object disposal and parent access.
+void scythe::D3D11GraphicsScene::DismissObject(ObjectID aObject) {
+	if (!CheckObjectStuff(m_Objects, aObject)) return;
+	D3D11Object* p_Object = m_Objects[aObject.ID - 1];
+	{
+		SC_ARM_D11GS_LOCK();
+		m_Objects[aObject.ID - 1] = NULL;
+	}
+	SC_IFNOTNULLRELEASE(p_Object->i_IndexBuffer);
+	SC_IFNOTNULLRELEASE(p_Object->i_VertexBuffer);
+	delete p_Object;
+}
+
+scythe::IGraphicsDevice* scythe::D3D11GraphicsScene::GetParent() {
+	return i_GraphicsDevice;
+}
+// End high confidence: object disposal and parent access.
+
+// Medium confidence: albedo rendering assumes gb_math column-major transforms.
+void scythe::D3D11GraphicsScene::AlbedoRender(const matrix4x4& aPV) {
+	SpecialContextLock h_Context = i_GraphicsDevice->OwnContext();
+	ID3D11DeviceContext* i_Context = h_Context.i_DeviceContext;
+	i_Context->PSSetShader(i_AlbedoPixelShader, NULL, 0);
+	i_Context->PSSetShaderResources(0, 1, &i_WhiteTextureSRV);
+	i_Context->PSSetSamplers(0, 1, &i_WhiteSampler);
+	i_Context->VSSetShader(i_AlbedoVertexShader, NULL, 0);
+	i_Context->VSSetConstantBuffers(0, 1, &i_AlbedoConstantBuffer);
+	i_Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	i_Context->IASetInputLayout(i_InputLayout);
+	for (D3D11Object* p_Object : m_Objects) {
+		if (!p_Object) continue;
+		D3D11_BUFFER_DESC m_VertexDesc, m_IndexDesc;
+		p_Object->i_VertexBuffer->GetDesc(&m_VertexDesc);
+		p_Object->i_IndexBuffer->GetDesc(&m_IndexDesc);
+		if (p_Object->m_Stride < 5 * sizeof(float32)) {
+			SC_LOG("Object vertex stride is too small for the albedo input layout");
+			continue;
+		}
+		UINT m_Stride = p_Object->m_Stride;
+		UINT m_Offset = 0;
+		i_Context->IASetVertexBuffers(0, 1, &p_Object->i_VertexBuffer, &m_Stride, &m_Offset);
+		i_Context->IASetIndexBuffer(p_Object->i_IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+		for (const ClearClumpD3D11& r_Clump : p_Object->m_Clumps) {
+			if (r_Clump.Expired || r_Clump.Metadata.NumIndices == 0) continue;
+			const CLUMP_METADATA& r_Metadata = r_Clump.Metadata;
+			if (r_Metadata.StartVertexBufferBytes > m_VertexDesc.ByteWidth ||
+				r_Metadata.NumVertexBufferBytes > m_VertexDesc.ByteWidth - r_Metadata.StartVertexBufferBytes ||
+				r_Metadata.StartIndexBufferBytes > m_IndexDesc.ByteWidth ||
+				r_Metadata.NumIndexBufferBytes > m_IndexDesc.ByteWidth - r_Metadata.StartIndexBufferBytes ||
+				r_Metadata.StartIndexBufferBytes % sizeof(uint16) != 0 ||
+				r_Metadata.StartIndex < r_Metadata.StartIndexBufferBytes / sizeof(uint16) ||
+				r_Metadata.StartIndex - r_Metadata.StartIndexBufferBytes / sizeof(uint16) > r_Metadata.NumIndexBufferBytes / sizeof(uint16) ||
+				r_Metadata.NumIndices > r_Metadata.NumIndexBufferBytes / sizeof(uint16) -
+					(r_Metadata.StartIndex - r_Metadata.StartIndexBufferBytes / sizeof(uint16))) {
+				SC_LOG("Clump draw exceeds its buffer allocation");
+				continue;
+			}
+			D3D11_MAPPED_SUBRESOURCE m_Mapped = {};
+			if (FAILED(i_Context->Map(i_AlbedoConstantBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &m_Mapped))) {
+				SC_LOG("Failed to map albedo constant buffer");
+				continue;
+			}
+			// The shader reads rows; transpose the column-major PV * transform while composing it.
+			float32* p_Matrix = static_cast<float32*>(m_Mapped.pData);
+			for (uint32 m_Row = 0; m_Row < 4; ++m_Row) {
+				for (uint32 m_Column = 0; m_Column < 4; ++m_Column) {
+					float32 m_Value = 0.0f;
+					for (uint32 m_Inner = 0; m_Inner < 4; ++m_Inner) {
+						m_Value += aPV.m[m_Inner * 4 + m_Row] * r_Metadata.Transform.m[m_Column * 4 + m_Inner];
+					}
+					p_Matrix[m_Row * 4 + m_Column] = m_Value;
+				}
+			}
+			i_Context->Unmap(i_AlbedoConstantBuffer, 0);
+			i_Context->DrawIndexed(r_Metadata.NumIndices, static_cast<UINT>(r_Metadata.StartIndex), 0);
+		}
+	}
+	i_GraphicsDevice->DisownContext(h_Context);
+}
+// End medium confidence: albedo rendering.
 #endif // SC_ALLOW_D3D11

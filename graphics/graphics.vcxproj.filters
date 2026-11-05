@@ -16,6 +16,9 @@
     <Filter Include="core\scene\d3d11">
       <UniqueIdentifier>{2fab95d1-488b-45ab-82f7-3be9233a7342}</UniqueIdentifier>
     </Filter>
+    <Filter Include="core\freeflycam">
+      <UniqueIdentifier>{360e9023-06fb-4bb3-9046-a33ada9d9667}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\graphicsCore.c">
@@ -32,6 +35,9 @@
     </ClCompile>
     <ClCompile Include="src\d3d11scene.cpp">
       <Filter>core\scene\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="src\freeflycam.cpp">
+      <Filter>core\freeflycam</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

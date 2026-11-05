@@ -9,6 +9,9 @@
   <Folder Name="/graphics/core/">
     <File Path="common/graphics/graphicsCore.h" />
   </Folder>
+  <Folder Name="/graphics/core/freeflycam/">
+    <File Path="common/graphics/freeflycam.h" />
+  </Folder>
   <Folder Name="/graphics/core/scene/">
     <File Path="common/graphics/IGraphicsScene.h" />
   </Folder>
@@ -30,6 +33,10 @@
   </Folder>
   <Folder Name="/runtime/debug/">
     <File Path="common/runtime/rtdebug.h" />
+  </Folder>
+  <Folder Name="/runtime/entrypoint/">
+    <File Path="common/runtime/exposition.h" />
+    <File Path="common/runtime/game.h" />
   </Folder>
   <Folder Name="/runtime/time/">
     <File Path="common/runtime/time.h" />
