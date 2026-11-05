@@ -429,17 +429,7 @@ void scythe::D3D11GraphicsScene::AlbedoRender(const matrix4x4& aPV) {
 				SC_LOG("Failed to map albedo constant buffer");
 				continue;
 			}
-			// The shader reads rows; transpose the column-major PV * transform while composing it.
-			float32* p_Matrix = static_cast<float32*>(m_Mapped.pData);
-			for (uint32 m_Row = 0; m_Row < 4; ++m_Row) {
-				for (uint32 m_Column = 0; m_Column < 4; ++m_Column) {
-					float32 m_Value = 0.0f;
-					for (uint32 m_Inner = 0; m_Inner < 4; ++m_Inner) {
-						m_Value += aPV.m[m_Inner * 4 + m_Row] * r_Metadata.Transform.m[m_Column * 4 + m_Inner];
-					}
-					p_Matrix[m_Row * 4 + m_Column] = m_Value;
-				}
-			}
+			gb_mat4_mul((gbMat4*)m_Mapped.pData, (gbMat4*)&aPV, (gbMat4*)&r_Metadata.Transform);
 			i_Context->Unmap(i_AlbedoConstantBuffer, 0);
 			i_Context->DrawIndexed(r_Metadata.NumIndices, static_cast<UINT>(r_Metadata.StartIndex), 0);
 		}
