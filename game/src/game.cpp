@@ -15,7 +15,6 @@ static scythe::ObjectID g_ObjectID = { 0 };
 static scythe::ClumpID g_ClumpID = { 0, 0 };
 
 void start_game() {
-	g_Camera.Reset();
 	scythe::CreateGraphicsScene(g_iScene, scythe::g_iGraphicsDevice);
 	SC_SMART_CHECK(g_iScene, "Failed to create graphics scene");
 	g_ObjectID = g_iScene->CreateObject(60, 6, 20);
@@ -36,22 +35,69 @@ void start_game() {
 	};
 	uint16 m_Indices[3] = { 0, 1, 2 };
 	g_ClumpID = g_iScene->CreateClump(m_Metadata, m_Vertices, m_Indices);
+	g_Camera.Reset();
+	g_Camera.SetSpeed(1.0f);
 }
 
-bool update_game() {
-	if (scythe::g_pWindow->ShouldClose() || !g_iScene) {
-		return false;
-	}
+static bool g_MouseToggle = true;
+static bool g_EscPressed = false;
+static matrix4x4 g_PVMatrix;
 
-	int m_Width = 0;
-	int m_Height = 0;
-	SDL_Window* p_Window = static_cast<SDL_Window*>(scythe::g_pWindow->GetBackendHandle());
-	if (p_Window && SDL_GetWindowSizeInPixels(p_Window, &m_Width, &m_Height) && m_Width > 0 && m_Height > 0) {
-		g_Camera.Move({ 0.0f, 0.0f, -1.0f });
-		g_Camera.Update(static_cast<float32>(scythe::g_DeltaTime), 60, static_cast<float32>(m_Width) / m_Height);
-		matrix4x4 m_ProjectionView;
-		g_Camera.GetMatrix(m_ProjectionView);
-		g_iScene->AlbedoRender(m_ProjectionView);
+bool update_game() {
+	// frame state start
+	{
+		if (scythe::g_pWindow->ShouldClose() || !g_iScene) {
+			return false;
+		}
+		if (!g_EscPressed && (scythe::g_pWindow->GetKey(scythe::Key::Escape) || scythe::g_pWindow->GetKeyUI(scythe::Key::Escape))) {
+			SC_TOGGLE(g_MouseToggle);
+		}
+		scythe::g_pWindow->ConcentrateMouse(g_MouseToggle);
+		g_EscPressed = (scythe::g_pWindow->GetKey(scythe::Key::Escape) || scythe::g_pWindow->GetKeyUI(scythe::Key::Escape));
+	}
+	// camera logic
+	{
+		float3 m_CamRotation;
+		g_Camera.GetRotation(m_CamRotation);
+		const float32 m_YawRad = gb_to_radians(m_CamRotation.y);
+		const float32 m_Cos = cosf(m_YawRad);
+		const float32 m_Sin = sinf(m_YawRad);
+		if (scythe::g_pWindow->GetKey(scythe::Key::W)) {
+			g_Camera.Move({ -m_Sin, 0, m_Cos });
+		}
+		if (scythe::g_pWindow->GetKey(scythe::Key::S)) {
+			g_Camera.Move({ m_Sin, 0, -m_Cos });
+		}
+		if (scythe::g_pWindow->GetKey(scythe::Key::A)) {
+			g_Camera.Move({ m_Cos, 0, m_Sin });
+		}
+		if (scythe::g_pWindow->GetKey(scythe::Key::D)) {
+			g_Camera.Move({ -m_Cos, 0, -m_Sin });
+		}
+		if (scythe::g_pWindow->GetKey(scythe::Key::Space)) {
+			g_Camera.Move({ 0, -1, 0 });
+		}
+		if (scythe::g_pWindow->GetKey(scythe::Key::LeftShift)) {
+			g_Camera.Move({ 0, 1, 0 });
+		}
+		// view rotation (skipped on the first frame)
+		static bool s_FirstLookFrame = true;
+		float2 m_MouseDelta;
+		scythe::g_pWindow->GetMouseDelta(m_MouseDelta);
+		if (s_FirstLookFrame) {
+			s_FirstLookFrame = false;
+		}
+		else {
+			g_Camera.Rotate({ m_MouseDelta.y, m_MouseDelta.x, 0 });
+		}
+	}
+	// render
+	{
+		uint2 m_WindowSize;
+		scythe::g_pWindow->GetSize(m_WindowSize);
+		g_Camera.Update(scythe::g_DeltaTime, 60.0f, (float32)m_WindowSize.x / m_WindowSize.y);
+		g_Camera.GetMatrix(g_PVMatrix);
+		g_iScene->AlbedoRender(g_PVMatrix);
 	}
 	return true;
 }

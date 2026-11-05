@@ -6,6 +6,7 @@
 #ifdef _MSC_VER
 #pragma region Definitions
 #endif // _MSC_VER
+#include <stdbool.h>
 typedef unsigned char uint8;
 typedef unsigned short uint16;
 typedef unsigned int uint32;
@@ -142,6 +143,12 @@ SC_SPECIAL_STATIC void* sc_malloc(size_t aSize) {
 SC_SPECIAL_STATIC void sc_free(void* aPtr) {
 	free(aPtr);
 }
+
+SC_SPECIAL_STATIC void sc_toggle(bool* aBool) {
+	*aBool = !(*aBool);
+}
+
+#define SC_TOGGLE(aBool) sc_toggle(&aBool)
 
 // Annex-K stuff
 
