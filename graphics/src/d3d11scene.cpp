@@ -3,10 +3,11 @@
 
 #include <d3d11scene.h>
 #ifdef SC_ALLOW_D3D11
+#include <d3d11material.h>
 #include <runtime/rtdebug.h>
 #include <gb_math.h>
 
-#define SC_IFNOTNULLRELEASE(ptr) { if ((ptr)) { (ptr)->Release(); (ptr) = NULL; } }
+#define SC_IFNOTNULLRELEASE(ptr) do { if ((ptr)) { (ptr)->Release(); (ptr) = NULL; } } while (0)
 
 static const uint32 g_VertexShaderBytecodeAlbedo[] = { 1128421444u, 2402879077u, 4141149369u, 3236055827u, 3179830628u, 1u, 1820u, 6u, 56u, 584u,
 1316u, 1440u, 1648u, 1732u, 963538753u, 520u, 520u, 4294836736u, 468u, 52u,
@@ -74,8 +75,8 @@ static const uint32 g_PixelShaderBytecodeAlbedo[] = { 1128421444u, 1375268566u, 
 2880154368u, 1313297231u, 44u, 1u, 8u, 32u, 0u, 0u, 3u, 0u,
 15u, 1415534163u, 1162302017u, 2880110676u, };
 
-#define SC_RET_SMART_CHECK_DISMISS(expr, error) { if (!(expr)) { Dismiss(); SC_LOG("%s", error); return false; } }
-#define SC_CREATE_AND_ZERO(type, name) type name; SC_ZMEM(&name, sizeof(type));
+#define SC_RET_SMART_CHECK_DISMISS(expr, error) do { if (!(expr)) { Dismiss(); SC_LOG("%s", error); return false; } } while (0)
+#define SC_CREATE_AND_ZERO(type, name) type name; SC_ZMEM(&name, sizeof(type))
 
 // call this only when modifying class state
 #define SC_ARM_D11GS_LOCK() std::unique_lock h_Lock(h_GeneralMutex)
@@ -365,6 +366,17 @@ void scythe::D3D11GraphicsScene::UpdateClump(ClumpID aClump, uint16* apIndexData
 		p_Clump->Metadata.StartIndexBufferBytes, p_Clump->Metadata.NumIndexBufferBytes,
 		aCurrentAttemptedAllocationSize, apIndexData);
 }
+
+void scythe::D3D11GraphicsScene::UpdateClump(ClumpID aClump, IMaterial* aiMaterial) {
+	SC_ARM_D11GS_LOCK();
+	ClearClumpD3D11* p_Clump = FindLiveClump(m_Objects, aClump);
+	if (!p_Clump) return;
+	if (aiMaterial && aiMaterial->GetParent() != i_GraphicsDevice) {
+		SC_LOG("Clump material belongs to a different graphics device");
+		return;
+	}
+	p_Clump->Metadata.iMaterial = aiMaterial;
+}
 // End high confidence: clump lookup and updates.
 
 // High confidence: object disposal and parent access.
@@ -380,6 +392,18 @@ void scythe::D3D11GraphicsScene::DismissObject(ObjectID aObject) {
 	delete p_Object;
 }
 
+scythe::LightID scythe::D3D11GraphicsScene::CreateLight(float3 aLightPos, float32 aLightRange, float32 aEarlyIntensity) {
+	return { 0 };
+}
+
+void scythe::D3D11GraphicsScene::UpdateLight(LightID aLight, float3 aLightPos) {
+	
+}
+
+void scythe::D3D11GraphicsScene::DismissLight(LightID aLight){
+
+}
+
 scythe::IGraphicsDevice* scythe::D3D11GraphicsScene::GetParent() {
 	return i_GraphicsDevice;
 }
@@ -387,11 +411,10 @@ scythe::IGraphicsDevice* scythe::D3D11GraphicsScene::GetParent() {
 
 // Medium confidence: albedo rendering assumes gb_math column-major transforms.
 void scythe::D3D11GraphicsScene::AlbedoRender(const matrix4x4& aPV) {
+	SC_ARM_D11GS_LOCK();
 	SpecialContextLock h_Context = i_GraphicsDevice->OwnContext();
 	ID3D11DeviceContext* i_Context = h_Context.i_DeviceContext;
 	i_Context->PSSetShader(i_AlbedoPixelShader, NULL, 0);
-	i_Context->PSSetShaderResources(0, 1, &i_WhiteTextureSRV);
-	i_Context->PSSetSamplers(0, 1, &i_WhiteSampler);
 	i_Context->VSSetShader(i_AlbedoVertexShader, NULL, 0);
 	i_Context->VSSetConstantBuffers(0, 1, &i_AlbedoConstantBuffer);
 	i_Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -412,6 +435,17 @@ void scythe::D3D11GraphicsScene::AlbedoRender(const matrix4x4& aPV) {
 		for (const ClearClumpD3D11& r_Clump : p_Object->m_Clumps) {
 			if (r_Clump.Expired || r_Clump.Metadata.NumIndices == 0) continue;
 			const CLUMP_METADATA& r_Metadata = r_Clump.Metadata;
+			ID3D11ShaderResourceView* i_SRV = i_WhiteTextureSRV;
+			ID3D11SamplerState* i_Sampler = i_WhiteSampler;
+			if (r_Metadata.iMaterial) {
+				if (r_Metadata.iMaterial->GetParent() != i_GraphicsDevice) {
+					SC_LOG("Clump material belongs to a different graphics device");
+					continue;
+				}
+				D3D11Material* p_Material = static_cast<D3D11Material*>(r_Metadata.iMaterial);
+				i_SRV = p_Material->GetSRV();
+				i_Sampler = p_Material->GetSampler();
+			}
 			if (r_Metadata.StartVertexBufferBytes > m_VertexDesc.ByteWidth ||
 				r_Metadata.NumVertexBufferBytes > m_VertexDesc.ByteWidth - r_Metadata.StartVertexBufferBytes ||
 				r_Metadata.StartIndexBufferBytes > m_IndexDesc.ByteWidth ||
@@ -431,6 +465,8 @@ void scythe::D3D11GraphicsScene::AlbedoRender(const matrix4x4& aPV) {
 			}
 			gb_mat4_mul((gbMat4*)m_Mapped.pData, (gbMat4*)&aPV, (gbMat4*)&r_Metadata.Transform);
 			i_Context->Unmap(i_AlbedoConstantBuffer, 0);
+			i_Context->PSSetShaderResources(0, 1, &i_SRV);
+			i_Context->PSSetSamplers(0, 1, &i_Sampler);
 			i_Context->DrawIndexed(r_Metadata.NumIndices, static_cast<UINT>(r_Metadata.StartIndex), 0);
 		}
 	}

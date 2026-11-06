@@ -7,14 +7,36 @@
 #include <graphics/IGraphicsScene.h>
 #include <graphics/freeflycam.h>
 #include <gb_math.h>
-#include <SDL3/SDL.h>
+#include <vector>
 
 static scythe::FreeflyCamera g_Camera;
 static scythe::IGraphicsScene* g_iScene = NULL;
+static scythe::IMaterial* g_iMaterial = NULL;
 static scythe::ObjectID g_ObjectID = { 0 };
 static scythe::ClumpID g_ClumpID = { 0, 0 };
 
+struct StructuredMesh {
+	scythe::ObjectID ObjID;
+	std::vector<scythe::ClumpID> Clumps;
+	std::vector<float32> Vertices; // stride must be 20B
+	std::vector<uint16> Indices;
+};
+
+StructuredMesh LoadMeshIntoSceneAndRetrieveInfo(const char* aFilePath, scythe::IGraphicsScene* aiScene);
+
 void start_game() {
+	scythe::MATERIAL_DESC m_MaterialDesc = {};
+	m_MaterialDesc.SamplerState = scythe::SAMPLER_STATE_NEAREST;
+	m_MaterialDesc.TextureSize = { 2, 2 };
+	m_MaterialDesc.PitchBytes = 8;
+	uint8  m_TextureData[16] = {
+		255, 0, 0, 255,
+		0, 255, 0, 255,
+		0, 255, 0, 255,
+		255, 0, 0, 255
+	};
+	m_MaterialDesc.pInitialData = m_TextureData;
+	scythe::CreateMaterial(g_iMaterial, scythe::g_iGraphicsDevice, m_MaterialDesc);
 	scythe::CreateGraphicsScene(g_iScene, scythe::g_iGraphicsDevice);
 	SC_SMART_CHECK(g_iScene, "Failed to create graphics scene");
 	g_ObjectID = g_iScene->CreateObject(60, 6, 20);
@@ -28,6 +50,7 @@ void start_game() {
 	m_Metadata.StartIndex = 0;
 	m_Metadata.StartVertexBufferBytes = 0;
 	m_Metadata.StartIndexBufferBytes = 0;
+	m_Metadata.iMaterial = g_iMaterial;
 	float32 m_Vertices[15] = {
 		0.0f, 0.5f, 0.0f, 1.0f, 0.0f,
 		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
@@ -38,6 +61,7 @@ void start_game() {
 	g_Camera.Reset();
 	g_Camera.SetSpeed(1.0f);
 }
+
 
 static bool g_MouseToggle = true;
 static bool g_EscPressed = false;
@@ -106,4 +130,5 @@ void end_game() {
 	g_iScene->DismissClump(g_ClumpID);
 	g_iScene->DismissObject(g_ObjectID);
 	g_iScene->Dismiss();
+	g_iMaterial->Dismiss();
 }

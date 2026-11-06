@@ -6,7 +6,7 @@
 #include <runtime/rtdebug.h>
 #include <string>
 
-#define SC_IFNOTNULLRELEASE(ptr) { if ((ptr)) { (ptr)->Release(); (ptr) = NULL; } }
+#define SC_IFNOTNULLRELEASE(ptr) do { if ((ptr)) { (ptr)->Release(); (ptr) = NULL; } } while (0)
 
 bool scythe::D3D11GraphicsDevice::Create(Window* apWindow) {
 	{

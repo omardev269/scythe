@@ -4,6 +4,7 @@
 #ifndef SC_GRAPHICS_SCENE_H
 #define SC_GRAPHICS_SCENE_H
 #include <graphics/IGraphicsDevice.h>
+#include <graphics/IMaterial.h>
 
 namespace scythe
 {
@@ -12,6 +13,9 @@ namespace scythe
 	};
 	struct ClumpID {
 		ulargeint FatherID;
+		ulargeint ID;
+	};
+	struct LightID {
 		ulargeint ID;
 	};
 	struct CLUMP_METADATA {
@@ -24,9 +28,13 @@ namespace scythe
 		ulargeint NumIndexBufferBytes;
 		uint16 NumVertices;
 		uint32 NumIndices;
+		// Non-owning; NULL selects white. Materials must use the scene's device and outlive their clump references.
+		// Do not recreate or dismiss a referenced material while rendering; remove references before dismissal.
+		IMaterial* iMaterial;
 	};
 	struct IGraphicsScene {
 		virtual bool Create(IGraphicsDevice* aiGraphicsDevice) = 0;
+		virtual LightID CreateLight(float3 aLightPos, float32 aLightRange, /* currently unused */ float32 aEarlyIntensity) = 0;
 		virtual ObjectID CreateObject(ulargeint aVertexBufferBytes, ulargeint aIndexBufferBytes, uint32 aStride) = 0;
 		virtual ClumpID CreateClump(const CLUMP_METADATA& aMetadata, float32* apVertexStartData, uint16* apIndexStartData) = 0;
 		virtual void UpdateClump(ClumpID aClump, const matrix4x4& aTransform) = 0;
@@ -34,9 +42,12 @@ namespace scythe
 		virtual void UpdateClumpNumIndices(ClumpID aClump, uint32 aNumIndices) = 0;
 		virtual void UpdateClump(ClumpID aClump, float32* apVertexData, ulargeint aCurrentAttemptedAllocationSize) = 0;
 		virtual void UpdateClump(ClumpID aClump, uint16* apIndexData, ulargeint aCurrentAttemptedAllocationSize) = 0;
+		virtual void UpdateClump(ClumpID aClump, IMaterial* aiMaterial) = 0;
+		virtual void UpdateLight(LightID aLight, float3 aLightPos) = 0;
 		virtual IGraphicsDevice* GetParent() = 0;
 		virtual void DismissClump(ClumpID& aClump) = 0;
 		virtual void DismissObject(ObjectID aObject) = 0;
+		virtual void DismissLight(LightID aLight) = 0;
 		virtual void AlbedoRender(const matrix4x4& aPV) = 0;
 		// Make sure that you join all threads using the scene before dismissing this class
 		virtual void Dismiss() = 0;

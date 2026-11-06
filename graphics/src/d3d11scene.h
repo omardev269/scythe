@@ -40,6 +40,7 @@ namespace scythe
 
 	public:
 		bool Create(IGraphicsDevice* aiGraphicsDevice) override;
+		LightID CreateLight(float3 aLightPos, float32 aLightRange, /* currently unused */ float32 aEarlyIntensity) override;
 		ObjectID CreateObject(ulargeint aVertexBufferBytes, ulargeint aIndexBufferBytes, uint32 aStride) override;
 		ClumpID CreateClump(const CLUMP_METADATA& aMetadata, float32* apVertexStartData, uint16* apIndexStartData) override;
 		void UpdateClump(ClumpID aClump, const matrix4x4& aTransform) override;
@@ -47,8 +48,11 @@ namespace scythe
 		void UpdateClumpNumIndices(ClumpID aClump, uint32 aNumIndices) override;
 		void UpdateClump(ClumpID aClump, float32* apVertexData, ulargeint aCurrentAttemptedAllocationSize) override;
 		void UpdateClump(ClumpID aClump, uint16* apIndexData, ulargeint aCurrentAttemptedAllocationSize) override;
+		void UpdateClump(ClumpID aClump, IMaterial* aiMaterial) override;
+		void UpdateLight(LightID aLight, float3 aLightPos) override;
 		void DismissClump(ClumpID& aClump) override;
 		void DismissObject(ObjectID aObject) override;
+		void DismissLight(LightID aLight) override;
 		IGraphicsDevice* GetParent() override;
 		void AlbedoRender(const matrix4x4& aPV) override;
 		void Dismiss() override;

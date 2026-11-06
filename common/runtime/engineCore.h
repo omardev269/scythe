@@ -4,7 +4,7 @@
 #ifndef ENGINE_CORE_H
 #define ENGINE_CORE_H
 #include <runtime/engineCore_C.h>
-#define SC_IFNOTNULLDISMISS(ptr) { if (ptr) { ptr->Dismiss(); ptr = NULL; } }
+#define SC_IFNOTNULLDISMISS(ptr) do { if ((ptr)) { (ptr)->Dismiss(); (ptr) = NULL; } } while (0)
 #include <math.h>
 #include <emmintrin.h>
 #include <xmmintrin.h>

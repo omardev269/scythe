@@ -19,6 +19,9 @@
     <ClCompile Include="..\game\src\game.cpp">
       <Filter>game</Filter>
     </ClCompile>
+    <ClCompile Include="..\game\src\testloader.cpp">
+      <Filter>game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="debug">

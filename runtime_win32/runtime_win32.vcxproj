@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\game\src\game.cpp" />
+    <ClCompile Include="..\game\src\testloader.cpp" />
     <ClCompile Include="..\runtime\src\deps.cpp" />
     <ClCompile Include="..\runtime\src\rtdebug.c" />
     <ClCompile Include="..\runtime\src\schedule.cpp" />

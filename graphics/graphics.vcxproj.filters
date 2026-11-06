@@ -19,6 +19,12 @@
     <Filter Include="core\freeflycam">
       <UniqueIdentifier>{360e9023-06fb-4bb3-9046-a33ada9d9667}</UniqueIdentifier>
     </Filter>
+    <Filter Include="core\material">
+      <UniqueIdentifier>{35e2aea4-3069-426b-be3c-a16e8d7a9590}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\material\d3d11">
+      <UniqueIdentifier>{2cffa36e-0da8-4ce7-b71d-e83158dacc37}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\graphicsCore.c">
@@ -38,6 +44,12 @@
     </ClCompile>
     <ClCompile Include="src\freeflycam.cpp">
       <Filter>core\freeflycam</Filter>
+    </ClCompile>
+    <ClCompile Include="src\material.cpp">
+      <Filter>core\material</Filter>
+    </ClCompile>
+    <ClCompile Include="src\d3d11material.cpp">
+      <Filter>core\material\d3d11</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

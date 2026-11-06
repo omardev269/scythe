@@ -12,6 +12,12 @@
   <Folder Name="/graphics/core/freeflycam/">
     <File Path="common/graphics/freeflycam.h" />
   </Folder>
+  <Folder Name="/graphics/core/material/">
+    <File Path="common/graphics/IMaterial.h" />
+  </Folder>
+  <Folder Name="/graphics/core/material/d3d11/">
+    <File Path="graphics/src/d3d11material.h" />
+  </Folder>
   <Folder Name="/graphics/core/scene/">
     <File Path="common/graphics/IGraphicsScene.h" />
   </Folder>
