@@ -4,14 +4,16 @@
 #ifndef SC_FREEFLYCAM_H
 #define SC_FREEFLYCAM_H
 #include <graphics/graphicsCore.h>
+#include <hlsl++/matrix_float_type.h>
+#include <hlsl++/vector_float_type.h>
 
 namespace scythe {
 	class FreeflyCamera {
-		float3 m_Rotation;
-		float3 m_Position;
-		float3 m_RotationalDelta;
-		float3 m_PositionalDelta;
-		matrix4x4 m_Mat;
+		hlslpp::float3 m_Rotation;
+		hlslpp::float3 m_Position;
+		hlslpp::float3 m_RotationalDelta;
+		hlslpp::float3 m_PositionalDelta;
+		hlslpp::float4x4 m_Mat;
 		float32 m_Speed;
 	public:
 		void Reset();

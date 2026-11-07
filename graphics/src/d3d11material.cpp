@@ -136,7 +136,7 @@ void scythe::D3D11Material::UpdateData(void* apNewData) {
 	SpecialContextLock h_Lock = i_GraphicsDevice->OwnContext();
 	h_Lock.i_DeviceContext->UpdateSubresource(i_Texture, 0, &m_Box, apNewData, m_MaterialDesc.PitchBytes, 0);
 	// pessimized
-	i_GraphicsDevice->DisownContext(h_Lock); // it is a healthy practice
+	i_GraphicsDevice->DisownContext(h_Lock); // it is a healthy practice to train yourself on manually disowning the context
 }
 
 bool scythe::D3D11Material::Recreate(MATERIAL_DESC aMaterialDesc) {

@@ -3,38 +3,48 @@
 
 #include <graphics/freeflycam.h>
 #include <runtime/rtdebug.h>
-#include <gb.h>
-#include <gb_math.h>
+#include <hlsl++.h>
 
 namespace scythe {
 	void FreeflyCamera::Reset() {
-		SC_ZMEM(this, sizeof(*this));
-		gb_mat4_identity((gbMat4*)&m_Mat);
+		m_Position = { 0,0,0 };
+		m_PositionalDelta = { 0,0,0 };
+		m_Rotation = { 0,0,0 };
+		m_RotationalDelta = { 0,0,0 };
+		m_Mat = hlslpp::float4x4::identity();
 		m_Speed = 1.0f;
 	}
 
 	void FreeflyCamera::GetPosition(float3& oPos)
 	{
-		oPos = m_Position;
+		float32 m_Values[3];
+		hlslpp::store(m_Values, -m_Position);
+		oPos = { m_Values[0], m_Values[1], m_Values[2] };
 	}
 
 	void FreeflyCamera::GetRotation(float3& oRot)
 	{
-		oRot = m_Rotation;
+		float32 m_Values[3];
+		hlslpp::store(m_Values, m_Rotation);
+		oRot = { m_Values[0], m_Values[1], m_Values[2] };
 	}
 
 	void FreeflyCamera::Teleport(float3 aPos) {
-		m_Position = aPos;
+		m_Position.x = -aPos.x;
+		m_Position.y = -aPos.y;
+		m_Position.z = -aPos.z;
 	}
 
 	void FreeflyCamera::SetRotation(float3 aRot) {
-		m_Rotation = aRot;
+		m_Rotation.x = aRot.x;
+		m_Rotation.y = aRot.y;
+		m_Rotation.z = aRot.z;
 	}
 
 	void FreeflyCamera::Move(float3 aDelta) {
-		m_PositionalDelta.x += aDelta.x;
-		m_PositionalDelta.y += aDelta.y;
-		m_PositionalDelta.z += aDelta.z;
+		m_PositionalDelta.x -= aDelta.x;
+		m_PositionalDelta.y -= aDelta.y;
+		m_PositionalDelta.z -= aDelta.z;
 	}
 
 	void FreeflyCamera::Rotate(float3 aDelta) {
@@ -50,49 +60,46 @@ namespace scythe {
 	void FreeflyCamera::Update(float32 aDeltaTime, int32 aFOV, float32 aAspectRatio) {
 		// value adjustment
 		// - position
-		m_PositionalDelta.x *= aDeltaTime;
-		m_PositionalDelta.y *= aDeltaTime;
-		m_PositionalDelta.z *= aDeltaTime;
+		m_PositionalDelta *= aDeltaTime;
 		SC_SMART_CHECK(m_Speed >= 0.0f, "FreeflyCamera speed is negative");
-		m_PositionalDelta.x *= m_Speed;
-		m_PositionalDelta.y *= m_Speed;
-		m_PositionalDelta.z *= m_Speed;
-		m_Position.x += m_PositionalDelta.x;
-		m_Position.y += m_PositionalDelta.y;
-		m_Position.z += m_PositionalDelta.z;
-		SC_ZMEM(&m_PositionalDelta, sizeof(m_PositionalDelta));
+		m_PositionalDelta *= m_Speed;
+		m_Position += m_PositionalDelta;
+		m_PositionalDelta = hlslpp::float3(0.0f, 0.0f, 0.0f);
 		// - rotation
-		m_RotationalDelta.x *= m_Speed;
-		m_RotationalDelta.y *= m_Speed;
-		m_RotationalDelta.z *= m_Speed;
-		m_Rotation.x += m_RotationalDelta.x;
-		m_Rotation.y += m_RotationalDelta.y;
-		m_Rotation.z += m_RotationalDelta.z;
-		SC_ZMEM(&m_RotationalDelta.x, sizeof(m_RotationalDelta));
+		m_RotationalDelta *= m_Speed;
+		m_Rotation += m_RotationalDelta;
+		m_RotationalDelta = hlslpp::float3(0.0f, 0.0f, 0.0f);
 		// -
-		gbMat4 m_Projection;
-		gbMat4 m_Rotate0;
-		gbMat4 m_Rotate1;
-		gbMat4 m_Rotate01;
-		gbMat4 m_Rotate2;
-		gbMat4 m_Rotate;
-		gbMat4 m_Translate;
-		// projection
-		gb_mat4_perspective(&m_Projection, gb_to_radians((float32)aFOV), aAspectRatio, 0.1f, 1000.0f);
-		// rotation
-		gb_mat4_rotate(&m_Rotate0, { 1, 0, 0 }, gb_to_radians(m_Rotation.x));
-		gb_mat4_rotate(&m_Rotate1, { 0, 1, 0 }, gb_to_radians(m_Rotation.y));
-		gb_mat4_rotate(&m_Rotate2, { 0, 0, 1 }, gb_to_radians(m_Rotation.z));
-		gb_mat4_mul(&m_Rotate01, &m_Rotate0, &m_Rotate1);
-		gb_mat4_mul(&m_Rotate, &m_Rotate01, &m_Rotate2);
-		// translation
-		gb_mat4_translate(&m_Translate, { m_Position.x, m_Position.y, m_Position.z });
-		// multiplication
-		gb_mat4_mul((gbMat4*)&m_Mat, &m_Projection, &m_Rotate);
-		gb_mat4_mul((gbMat4*)&m_Mat, (gbMat4*)&m_Mat, &m_Translate);
+		const hlslpp::frustum m_Frustum = hlslpp::frustum::field_of_view_y(hlslpp::radians(static_cast<float32>(aFOV)), aAspectRatio, 0.05f, 500.0f);
+		hlslpp::float4x4 m_Projection = hlslpp::float4x4::perspective(hlslpp::projection(m_Frustum, hlslpp::zclip::minus_one));
+		const hlslpp::float3 m_Angles = hlslpp::radians(m_Rotation);
+#if HLSLPP_COORDINATES == HLSLPP_COORDINATES_RIGHT_HANDED
+		const hlslpp::float3 m_TransformAngles = -m_Angles;
+#else
+		const hlslpp::float3 m_TransformAngles = m_Angles;
+		const hlslpp::float4x4 m_FlipZ = hlslpp::float4x4::scale(1.0f, 1.0f, -1.0f);
+#if HLSLPP_LOGICAL_LAYOUT == HLSLPP_LOGICAL_LAYOUT_ROW_MAJOR
+		m_Projection = hlslpp::mul(m_FlipZ, m_Projection);
+#else
+		m_Projection = hlslpp::mul(m_Projection, m_FlipZ);
+#endif
+#endif
+		const hlslpp::float4x4 m_Rotate0 = hlslpp::float4x4::rotation_x(m_TransformAngles.x);
+		const hlslpp::float4x4 m_Rotate1 = hlslpp::float4x4::rotation_y(m_TransformAngles.y);
+		const hlslpp::float4x4 m_Rotate2 = hlslpp::float4x4::rotation_z(m_TransformAngles.z);
+		const hlslpp::float4x4 m_Translate = hlslpp::float4x4::translation(m_Position);
+#if HLSLPP_LOGICAL_LAYOUT == HLSLPP_LOGICAL_LAYOUT_ROW_MAJOR
+		m_Mat = hlslpp::mul(hlslpp::mul(hlslpp::mul(hlslpp::mul(m_Translate, m_Rotate2), m_Rotate1), m_Rotate0), m_Projection);
+#else
+		m_Mat = hlslpp::mul(hlslpp::mul(hlslpp::mul(hlslpp::mul(m_Projection, m_Rotate0), m_Rotate1), m_Rotate2), m_Translate);
+#endif
 	}
 	void FreeflyCamera::GetMatrix(matrix4x4& oMatrix)
 	{
-		oMatrix = m_Mat;
+#if HLSLPP_LOGICAL_LAYOUT == HLSLPP_LOGICAL_LAYOUT_ROW_MAJOR
+		hlslpp::store(oMatrix.m, m_Mat);
+#else
+		hlslpp::store_transposed(oMatrix.m, m_Mat);
+#endif
 	}
 }

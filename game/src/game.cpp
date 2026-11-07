@@ -87,22 +87,22 @@ bool update_game() {
 		const float32 m_Cos = cosf(m_YawRad);
 		const float32 m_Sin = sinf(m_YawRad);
 		if (scythe::g_pWindow->GetKey(scythe::Key::W)) {
-			g_Camera.Move({ -m_Sin, 0, m_Cos });
-		}
-		if (scythe::g_pWindow->GetKey(scythe::Key::S)) {
 			g_Camera.Move({ m_Sin, 0, -m_Cos });
 		}
-		if (scythe::g_pWindow->GetKey(scythe::Key::A)) {
-			g_Camera.Move({ m_Cos, 0, m_Sin });
+		if (scythe::g_pWindow->GetKey(scythe::Key::S)) {
+			g_Camera.Move({ -m_Sin, 0, m_Cos });
 		}
-		if (scythe::g_pWindow->GetKey(scythe::Key::D)) {
+		if (scythe::g_pWindow->GetKey(scythe::Key::A)) {
 			g_Camera.Move({ -m_Cos, 0, -m_Sin });
 		}
+		if (scythe::g_pWindow->GetKey(scythe::Key::D)) {
+			g_Camera.Move({ m_Cos, 0, m_Sin });
+		}
 		if (scythe::g_pWindow->GetKey(scythe::Key::Space)) {
-			g_Camera.Move({ 0, -1, 0 });
+			g_Camera.Move({ 0, 1, 0 });
 		}
 		if (scythe::g_pWindow->GetKey(scythe::Key::LeftShift)) {
-			g_Camera.Move({ 0, 1, 0 });
+			g_Camera.Move({ 0, -1, 0 });
 		}
 		// view rotation (skipped on the first frame)
 		static bool s_FirstLookFrame = true;
