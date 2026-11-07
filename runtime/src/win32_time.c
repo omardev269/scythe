@@ -49,10 +49,21 @@ largefloat sc_get_time() {
 }
 
 largefloat sc_get_time_not_since_engine_startup() {
+#ifdef SC_X64
 	LARGE_INTEGER m_Now;
 	QueryPerformanceCounter(&m_Now);
 	return sc_time_ticks_to_float((uint32)m_Now.HighPart, (uint32)m_Now.LowPart) *
 		sc_time_seconds_per_tick;
+#else
+	LARGE_INTEGER m_Now;
+	uint32 m_Low;
+	uint32 m_High;
+	QueryPerformanceCounter(&m_Now);
+	m_Low = (uint32)m_Now.LowPart - sc_time_start_low;
+	m_High = (uint32)m_Now.HighPart - sc_time_start_high -
+		((uint32)m_Now.LowPart < sc_time_start_low);
+	return sc_time_ticks_to_float(m_High, m_Low) * sc_time_seconds_per_tick;
+#endif // SC_X64
 }
 
 largefloat sc_get_delta_and_update_time(largefloat* apLastTime, largefloat* apUpdateTime) {
