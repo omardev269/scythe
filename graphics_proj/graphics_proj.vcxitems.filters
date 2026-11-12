@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="core">
+      <UniqueIdentifier>{a5a33610-4817-4670-a99c-d9c5f0ba5e94}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\workflow">
+      <UniqueIdentifier>{0fe95d6b-bff1-4000-b813-adb3ca29dc77}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\workflow\d3d11">
+      <UniqueIdentifier>{1da838b6-6aed-42e0-9ecb-9f4f1e44047d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\scene">
+      <UniqueIdentifier>{0bae8ff0-fb58-44ce-966d-a6f6e9594950}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\scene\d3d11">
+      <UniqueIdentifier>{8fb1c793-526a-4205-8af2-e8a13842d5e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\freeflycam">
+      <UniqueIdentifier>{7580a4da-8bac-4cf6-bb88-9b078d02c1e8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\material">
+      <UniqueIdentifier>{8a74cf86-3c80-478e-a1c9-9e05fcf4fd93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core\material\d3d11">
+      <UniqueIdentifier>{0a7da4a4-9bc8-4c52-8bda-b1031be9c45a}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\graphics\src\graphicsCore.c">
+      <Filter>core</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\graphics\src\device.cpp">
+      <Filter>core\workflow</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\graphics\src\d3d11device.cpp">
+      <Filter>core\workflow\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\graphics\src\scene.cpp">
+      <Filter>core\scene</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\graphics\src\d3d11scene.cpp">
+      <Filter>core\scene\d3d11</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\graphics\src\freeflycam.cpp">
+      <Filter>core\freeflycam</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\graphics\src\material.cpp">
+      <Filter>core\material</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\graphics\src\d3d11material.cpp">
+      <Filter>core\material\d3d11</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\common\graphics\freeflycam.h">
+      <Filter>core\freeflycam</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\common\graphics\IMaterial.h">
+      <Filter>core\material</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\graphics\src\d3d11material.h">
+      <Filter>core\material\d3d11</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\graphics\src\d3d11scene.h">
+      <Filter>core\scene\d3d11</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\common\graphics\IGraphicsScene.h">
+      <Filter>core\scene</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\graphics\src\d3d11device.h">
+      <Filter>core\workflow\d3d11</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\common\graphics\IGraphicsDevice.h">
+      <Filter>core\workflow</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\common\graphics\graphicsCore.h">
+      <Filter>core</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

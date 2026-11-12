@@ -19,15 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\game\src\game.cpp" />
-    <ClCompile Include="..\game\src\testloader.cpp" />
-    <ClCompile Include="..\runtime\src\deps.cpp" />
-    <ClCompile Include="..\runtime\src\rtdebug.c" />
-    <ClCompile Include="..\runtime\src\schedule.cpp" />
-    <ClCompile Include="..\runtime\src\SDL3Window.cpp" />
-    <ClCompile Include="..\runtime\src\win32_time.c" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\graphics\graphics.vcxproj">
       <Project>{432bc4a1-904a-432e-b2f9-0be93422a351}</Project>
     </ProjectReference>
@@ -73,6 +64,7 @@
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Label="Shared">
+    <Import Project="..\runtime_proj\runtime_proj.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />

@@ -5,54 +5,11 @@
   </Configurations>
   <Folder Name="/graphics/">
     <Project Path="graphics/graphics.vcxproj" Id="432bc4a1-904a-432e-b2f9-0be93422a351" />
-  </Folder>
-  <Folder Name="/graphics/core/">
-    <File Path="common/graphics/graphicsCore.h" />
-  </Folder>
-  <Folder Name="/graphics/core/freeflycam/">
-    <File Path="common/graphics/freeflycam.h" />
-  </Folder>
-  <Folder Name="/graphics/core/material/">
-    <File Path="common/graphics/IMaterial.h" />
-  </Folder>
-  <Folder Name="/graphics/core/material/d3d11/">
-    <File Path="graphics/src/d3d11material.h" />
-  </Folder>
-  <Folder Name="/graphics/core/scene/">
-    <File Path="common/graphics/IGraphicsScene.h" />
-  </Folder>
-  <Folder Name="/graphics/core/scene/d3d11/">
-    <File Path="graphics/src/d3d11scene.h" />
-  </Folder>
-  <Folder Name="/graphics/core/workflow/">
-    <File Path="common/graphics/IGraphicsDevice.h" />
-  </Folder>
-  <Folder Name="/graphics/core/workflow/d3d11/">
-    <File Path="graphics/src/d3d11device.h" />
+    <Project Path="graphics_proj/graphics_proj.vcxitems" Id="80746a20-278d-4b7a-8adc-24942a164426" />
   </Folder>
   <Folder Name="/runtime/">
+    <Project Path="runtime_proj/runtime_proj.vcxitems" Id="be807d9b-828e-4612-b559-072033965b8f" />
     <Project Path="runtime_win32/runtime_win32.vcxproj" Id="f8db8f69-3537-459b-9947-c599f931b20c" />
-  </Folder>
-  <Folder Name="/runtime/core/">
-    <File Path="common/runtime/engineCore.h" />
-    <File Path="common/runtime/engineCore_C.h" />
-  </Folder>
-  <Folder Name="/runtime/debug/">
-    <File Path="common/runtime/rtdebug.h" />
-  </Folder>
-  <Folder Name="/runtime/entrypoint/">
-    <File Path="common/runtime/exposition.h" />
-    <File Path="common/runtime/game.h" />
-  </Folder>
-  <Folder Name="/runtime/time/">
-    <File Path="common/runtime/time.h" />
-    <File Path="runtime/src/timeint.h" />
-  </Folder>
-  <Folder Name="/runtime/updateable/">
-    <File Path="common/runtime/IUpdateable.h" />
-  </Folder>
-  <Folder Name="/runtime/window/">
-    <File Path="common/runtime/window.h" />
   </Folder>
   <Project Path="SDL3-3.4.16/VisualC/SDL/SDL.vcxproj" Id="81ce8daf-ebb2-4761-8e45-b71abcca8c68" />
 </Solution>

@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{be807d9b-828e-4612-b559-072033965b8f}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\game\src\game.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\game\src\testloader.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\runtime\src\deps.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\runtime\src\rtdebug.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\runtime\src\schedule.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\runtime\src\SDL3Window.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\runtime\src\win32_time.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\common\runtime\engineCore.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\common\runtime\engineCore_C.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\common\runtime\exposition.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\common\runtime\game.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\common\runtime\IUpdateable.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\common\runtime\rtdebug.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\common\runtime\time.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\common\runtime\window.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\runtime\src\timeint.h" />
+  </ItemGroup>
+</Project>

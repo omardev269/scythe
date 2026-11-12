@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="debug">
+      <UniqueIdentifier>{70a11e86-ae10-4f0f-a832-198fddd1d527}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="deps">
+      <UniqueIdentifier>{842988f5-7b1b-4f5d-af77-7e2f8bb04fe5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="entrypoint">
+      <UniqueIdentifier>{a78c8e35-1820-4b8a-bcad-49ed70d75ad3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="game">
+      <UniqueIdentifier>{b0f6af1a-c614-4833-ba8d-5f248adb7f03}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="time">
+      <UniqueIdentifier>{8a9d688d-c3dc-4e34-8b7a-00b724d6b98f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="window">
+      <UniqueIdentifier>{060d833d-e4e7-442f-a3d0-99536fba2b44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="core">
+      <UniqueIdentifier>{fb865280-7cab-4e17-a8df-53eaaeca1569}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="updateable">
+      <UniqueIdentifier>{29c38fbe-3032-44e3-bb24-4d011c1be71b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\runtime\src\rtdebug.c">
+      <Filter>debug</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\runtime\src\deps.cpp">
+      <Filter>deps</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\runtime\src\schedule.cpp">
+      <Filter>entrypoint</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\game\src\game.cpp">
+      <Filter>game</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\game\src\testloader.cpp">
+      <Filter>game</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\runtime\src\win32_time.c">
+      <Filter>time</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\runtime\src\SDL3Window.cpp">
+      <Filter>window</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\common\runtime\rtdebug.h">
+      <Filter>debug</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\common\runtime\exposition.h">
+      <Filter>entrypoint</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\common\runtime\game.h">
+      <Filter>entrypoint</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\common\runtime\time.h">
+      <Filter>time</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\runtime\src\timeint.h">
+      <Filter>time</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\common\runtime\window.h">
+      <Filter>window</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\common\runtime\engineCore.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\common\runtime\engineCore_C.h">
+      <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\common\runtime\IUpdateable.h">
+      <Filter>updateable</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

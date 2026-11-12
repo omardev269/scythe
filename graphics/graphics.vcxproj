@@ -57,6 +57,7 @@
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Label="Shared">
+    <Import Project="..\graphics_proj\graphics_proj.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -167,16 +168,6 @@
       <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="src\d3d11device.cpp" />
-    <ClCompile Include="src\d3d11material.cpp" />
-    <ClCompile Include="src\d3d11scene.cpp" />
-    <ClCompile Include="src\device.cpp" />
-    <ClCompile Include="src\freeflycam.cpp" />
-    <ClCompile Include="src\graphicsCore.c" />
-    <ClCompile Include="src\material.cpp" />
-    <ClCompile Include="src\scene.cpp" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
