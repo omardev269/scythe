@@ -1,0 +1,17 @@
+-r
+C:\scythe\runtime_win32\Intel® VTune™ Profiler Results\runtime_win32\r001hs
+--stack-stitching
+--data-limit-mb=1000
+--disk-space-limit=0
+--mrte-type=java,dotnet,python
+--itt-domains=all
+--stack-unwind-limit=8388608
+--itt-config=frame
+--itt-config=task,event,counter
+--stackwalk=offline
+--mrte-mode=auto
+--type=cpu:stack
+--interval=10
+--app-working-dir=C:\scythe\runtime_win32\
+--
+C:\scythe\x64\Debug\scytheTest.exe

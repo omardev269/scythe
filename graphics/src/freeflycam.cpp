@@ -56,7 +56,7 @@ namespace scythe {
 	void FreeflyCamera::SetSpeed(float32 aSpeed) {
 		m_Speed = aSpeed;
 	}
-
+	// hlslpp conversions are via AI - original version was gb_math
 	void FreeflyCamera::Update(float32 aDeltaTime, int32 aFOV, float32 aAspectRatio) {
 		// value adjustment
 		// - position
