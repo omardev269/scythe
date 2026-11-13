@@ -3,6 +3,7 @@
 
 #include <d3d11scene.h>
 #ifdef SC_ALLOW_D3D11
+#include <ID3D11GraphicsPipeline.h>
 #include <d3d11material.h>
 #include <runtime/rtdebug.h>
 #include <gb_math.h>
@@ -392,22 +393,89 @@ void scythe::D3D11GraphicsScene::DismissObject(ObjectID aObject) {
 	delete p_Object;
 }
 
-scythe::LightID scythe::D3D11GraphicsScene::CreateLight(float3 aLightPos, float32 aLightRange, float32 aEarlyIntensity) {
-	return { 0 };
+scythe::LightID scythe::D3D11GraphicsScene::CreateLight(const LIGHT_METADATA& aMetadata) {
+	SC_ARM_D11GS_LOCK();
+	m_Lights.push_back(aMetadata);
+	return { static_cast<uint32>(m_Lights.size()) };
 }
 
 void scythe::D3D11GraphicsScene::UpdateLight(LightID aLight, float3 aLightPos) {
-	
+	SC_ARM_D11GS_LOCK();
+	if (aLight.ID == 0 || aLight.ID > m_Lights.size()) return;
+	m_Lights[aLight.ID - 1].Position = aLightPos;
 }
 
 void scythe::D3D11GraphicsScene::DismissLight(LightID aLight){
-
+	SC_ARM_D11GS_LOCK();
+	if (aLight.ID == 0 || aLight.ID > m_Lights.size()) return;
+	
 }
 
 scythe::IGraphicsDevice* scythe::D3D11GraphicsScene::GetParent() {
 	return i_GraphicsDevice;
 }
-// End high confidence: object disposal and parent access.
+
+void scythe::D3D11GraphicsScene::Render(IGraphicsPipeline* aiPipeline, const matrix4x4& aPV) {
+	ID3D11GraphicsPipeline* i_Pipeline = dynamic_cast<ID3D11GraphicsPipeline*>(aiPipeline);
+	SC_ARM_D11GS_LOCK();
+	if (!i_Pipeline || i_Pipeline->GetDevice() != i_GraphicsDevice) {
+		SC_LOG("Scene pipeline is invalid or belongs to a different graphics device");
+		return;
+	}
+	i_Pipeline->SetLights(m_Lights);
+	for (D3D11Object* p_Object : m_Objects) {
+		if (!p_Object) continue;
+		D3D11_BUFFER_DESC m_VertexDesc, m_IndexDesc;
+		p_Object->i_VertexBuffer->GetDesc(&m_VertexDesc);
+		p_Object->i_IndexBuffer->GetDesc(&m_IndexDesc);
+		for (const ClearClumpD3D11& r_Clump : p_Object->m_Clumps) {
+			if (r_Clump.Expired || r_Clump.Metadata.NumIndices == 0) continue;
+			const CLUMP_METADATA& r_Metadata = r_Clump.Metadata;
+			if (r_Metadata.StartVertexBufferBytes > m_VertexDesc.ByteWidth ||
+				r_Metadata.NumVertexBufferBytes > m_VertexDesc.ByteWidth - r_Metadata.StartVertexBufferBytes ||
+				r_Metadata.StartIndexBufferBytes > m_IndexDesc.ByteWidth ||
+				r_Metadata.NumIndexBufferBytes > m_IndexDesc.ByteWidth - r_Metadata.StartIndexBufferBytes ||
+				r_Metadata.StartIndexBufferBytes % sizeof(uint16) != 0 ||
+				r_Metadata.StartIndex < r_Metadata.StartIndexBufferBytes / sizeof(uint16) ||
+				r_Metadata.StartIndex - r_Metadata.StartIndexBufferBytes / sizeof(uint16) > r_Metadata.NumIndexBufferBytes / sizeof(uint16) ||
+				r_Metadata.NumIndices > r_Metadata.NumIndexBufferBytes / sizeof(uint16) -
+					(r_Metadata.StartIndex - r_Metadata.StartIndexBufferBytes / sizeof(uint16))) {
+				SC_LOG("Clump draw exceeds its buffer allocation");
+				continue;
+			}
+			ID3D11ShaderResourceView* i_SRV = i_WhiteTextureSRV;
+			ID3D11SamplerState* i_Sampler = i_WhiteSampler;
+			if (r_Metadata.iMaterial) {
+				if (r_Metadata.iMaterial->GetParent() != i_GraphicsDevice) {
+					SC_LOG("Clump material belongs to a different graphics device");
+					continue;
+				}
+				D3D11Material* p_Material = static_cast<D3D11Material*>(r_Metadata.iMaterial);
+				i_SRV = p_Material->GetSRV();
+				i_Sampler = p_Material->GetSampler();
+			}
+			matrix4x4 m_Transform;
+			gb_mat4_mul((gbMat4*)&m_Transform, (gbMat4*)&aPV, (gbMat4*)&r_Metadata.Transform);
+			i_Pipeline->SetTransform(m_Transform);
+			i_Pipeline->SetRenderTexture(i_SRV);
+			i_Pipeline->SetRenderSampler(i_Sampler);
+			i_Pipeline->Render([&]() {
+				SpecialContextLock h_Context = i_GraphicsDevice->OwnContext();
+				ID3D11DeviceContext* i_Context = h_Context.i_DeviceContext;
+				UINT m_Stride = p_Object->m_Stride;
+				UINT m_Offset = 0;
+				i_Context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+				i_Context->IASetVertexBuffers(0, 1, &p_Object->i_VertexBuffer, &m_Stride, &m_Offset);
+				i_Context->IASetIndexBuffer(p_Object->i_IndexBuffer, DXGI_FORMAT_R16_UINT, 0);
+				i_Context->DrawIndexed(r_Metadata.NumIndices, static_cast<UINT>(r_Metadata.StartIndex), 0);
+				i_GraphicsDevice->DisownContext(h_Context);
+			});
+		}
+	}
+	i_Pipeline->SetRenderTexture(NULL);
+	i_Pipeline->SetRenderSampler(NULL);
+}
+// End medium confidence: pipeline rendering.
 
 // Medium confidence: albedo rendering assumes gb_math column-major transforms.
 void scythe::D3D11GraphicsScene::AlbedoRender(const matrix4x4& aPV) {

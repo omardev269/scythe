@@ -10,6 +10,7 @@ namespace scythe {
 	struct IGraphicsDevice : IUpdateable {
 		// should return false if the backend is not supported
 		virtual bool Create(Window* apWindow) = 0;
+		virtual void Reset() = 0;
 	};
 	void CreateGraphicsDevice(IGraphicsDevice*& oDevice, Window* apWindow);
 }

@@ -5,12 +5,14 @@
 #include <runtime/exposition.h>
 #include <runtime/rtdebug.h>
 #include <graphics/IGraphicsScene.h>
+#include <graphics/IGraphicsPipeline.h>
 #include <graphics/freeflycam.h>
 #include <gb_math.h>
 #include <vector>
 
 static scythe::FreeflyCamera g_Camera;
 static scythe::IGraphicsScene* g_iScene = NULL;
+static scythe::IGraphicsPipeline* g_iPipeline = NULL;
 static scythe::IMaterial* g_iMaterial = NULL;
 static scythe::ObjectID g_ObjectID = { 0 };
 static scythe::ClumpID g_ClumpID = { 0, 0 };
@@ -25,6 +27,11 @@ struct StructuredMesh {
 StructuredMesh LoadMeshIntoSceneAndRetrieveInfo(const char* aFilePath, scythe::IGraphicsScene* aiScene);
 
 void start_game() {
+	scythe::CreatePhongGraphicsPipeline(g_iPipeline, scythe::g_iGraphicsDevice);
+	if (!g_iPipeline) {
+		SC_LOG("Failed to create phong graphics pipeline");
+		return;
+	}
 	scythe::MATERIAL_DESC m_MaterialDesc = {};
 	m_MaterialDesc.SamplerState = scythe::SAMPLER_STATE_NEAREST;
 	m_MaterialDesc.TextureSize = { 2, 2 };
@@ -70,7 +77,7 @@ static matrix4x4 g_PVMatrix;
 bool update_game() {
 	// frame state start
 	{
-		if (scythe::g_pWindow->ShouldClose() || !g_iScene) {
+		if (scythe::g_pWindow->ShouldClose() || !g_iScene || !g_iPipeline) {
 			return false;
 		}
 		if (!g_EscPressed && (scythe::g_pWindow->GetKey(scythe::Key::Escape) || scythe::g_pWindow->GetKeyUI(scythe::Key::Escape))) {
@@ -121,14 +128,18 @@ bool update_game() {
 		scythe::g_pWindow->GetSize(m_WindowSize);
 		g_Camera.Update(scythe::g_DeltaTime, 60.0f, (float32)m_WindowSize.x / m_WindowSize.y);
 		g_Camera.GetMatrix(g_PVMatrix);
-		g_iScene->AlbedoRender(g_PVMatrix);
+		g_iScene->Render(g_iPipeline, g_PVMatrix);
+		g_iPipeline->Update();
 	}
 	return true;
 }
 
 void end_game() {
-	g_iScene->DismissClump(g_ClumpID);
-	g_iScene->DismissObject(g_ObjectID);
-	g_iScene->Dismiss();
-	g_iMaterial->Dismiss();
+	if (g_iScene) {
+		g_iScene->DismissClump(g_ClumpID);
+		g_iScene->DismissObject(g_ObjectID);
+		g_iScene->Dismiss();
+	}
+	if (g_iMaterial) g_iMaterial->Dismiss();
+	if (g_iPipeline) g_iPipeline->Dismiss();
 }

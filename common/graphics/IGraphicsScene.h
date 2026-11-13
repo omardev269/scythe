@@ -8,6 +8,7 @@
 
 namespace scythe
 {
+	struct IGraphicsPipeline;
 	struct ObjectID {
 		ulargeint ID;
 	};
@@ -32,9 +33,14 @@ namespace scythe
 		// Do not recreate or dismiss a referenced material while rendering; remove references before dismissal.
 		IMaterial* iMaterial;
 	};
+	struct LIGHT_METADATA {
+		float3 Position;
+		float3 Color;
+		float32 Range;
+	};
 	struct IGraphicsScene {
 		virtual bool Create(IGraphicsDevice* aiGraphicsDevice) = 0;
-		virtual LightID CreateLight(float3 aLightPos, float32 aLightRange, /* currently unused */ float32 aEarlyIntensity) = 0;
+		virtual LightID CreateLight(const LIGHT_METADATA& aMetadata) = 0;
 		virtual ObjectID CreateObject(ulargeint aVertexBufferBytes, ulargeint aIndexBufferBytes, uint32 aStride) = 0;
 		virtual ClumpID CreateClump(const CLUMP_METADATA& aMetadata, float32* apVertexStartData, uint16* apIndexStartData) = 0;
 		virtual void UpdateClump(ClumpID aClump, const matrix4x4& aTransform) = 0;
@@ -48,6 +54,7 @@ namespace scythe
 		virtual void DismissClump(ClumpID& aClump) = 0;
 		virtual void DismissObject(ObjectID aObject) = 0;
 		virtual void DismissLight(LightID aLight) = 0;
+		virtual void Render(IGraphicsPipeline* aiPipeline, const matrix4x4& aPV) = 0;
 		virtual void AlbedoRender(const matrix4x4& aPV) = 0;
 		// Make sure that you join all threads using the scene before dismissing this class
 		virtual void Dismiss() = 0;

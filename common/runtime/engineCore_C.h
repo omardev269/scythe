@@ -133,8 +133,6 @@ struct uint4 {
 
 // fun definitions
 
-#define SC_ZMEM(ptr, size) memset(ptr, 0, size)
-
 // Currently uses malloc
 SC_SPECIAL_STATIC void* sc_malloc(size_t aSize) {
 	return malloc(aSize);
@@ -192,6 +190,8 @@ SC_SPECIAL_STATIC errno_t sc_annexk_memset(void* aDst, size_t aDstSize, int aCha
 
 #define sc_memset_s(dst, dstsz, ch, count) \
 	SC_ANNEXK_CHECK("memset_s", sc_annexk_memset(dst, dstsz, ch, count))
+
+#define SC_ZMEM(ptr, size) sc_memset_s(ptr, size, 0, size)
 
 // Strings
 

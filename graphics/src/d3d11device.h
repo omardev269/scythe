@@ -25,6 +25,7 @@ namespace scythe {
 		ID3D11DepthStencilState* i_DepthStencilStateEnabled;
 		ID3D11DepthStencilState* i_DepthStencilStateDisabled;
 		ID3D11RasterizerState* i_RasterizerState;
+		ID3D11BlendState* i_TransparencyBlendState;
 		// --DXGI INTERFACES
 		IDXGIDevice* i_DxgiDevice;
 		IDXGIAdapter* i_DxgiAdapter;
@@ -38,15 +39,22 @@ namespace scythe {
 		RECT m_OldRect;
 		// --EXTRA INFORMATION
 		bool m_Warp;
+		bool m_DepthEnabled;
 		unsigned long long m_VRAMBytes; // VRAM (B) can overflow easily on 32-bit builds
 		D3D_FEATURE_LEVEL m_FeatureLevel;
+		void BindDeviceDefaults(ID3D11DeviceContext* aiContext);
 	public:
 		bool Create(Window* apWindow) override;
+		void Reset() override;
 		void BeginFrame() override;
 		void EndFrame() override;
 		void Dismiss() override;
 		// --NON-VIRTUAL FUNCTIONS
 		SC_INLINEFUNC ID3D11Device* GetDevice() { return i_Device; };
+		SC_INLINEFUNC const D3D11_VIEWPORT& GetViewport() const { return m_Viewport; };
+		SC_INLINEFUNC ID3D11RenderTargetView* GetMasterRenderTargetView() const { return i_MasterRenderTargetView; };
+		SC_INLINEFUNC ID3D11DepthStencilView* GetDepthStencilView() const { return i_DepthStencilView; };
+		void SetDepth(bool aEnabled);
 		SpecialContextLock OwnContext();
 		void DisownContext(SpecialContextLock& aLock);
 		SC_INLINEFUNC bool IsWarp() const { return m_Warp; };

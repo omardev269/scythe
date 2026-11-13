@@ -14,23 +14,30 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\graphics\src\d3d11albedographicspipeline.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\graphics\src\d3d11device.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\graphics\src\d3d11material.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\graphics\src\d3d11phonggraphicspipeline.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\graphics\src\d3d11scene.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\graphics\src\device.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\graphics\src\freeflycam.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\graphics\src\graphicsCore.c" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\graphics\src\material.cpp" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\graphics\src\pipeline.cpp" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\graphics\src\scene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\common\graphics\freeflycam.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\common\graphics\graphicsCore.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\common\graphics\IGraphicsDevice.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\common\graphics\IGraphicsPipeline.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\common\graphics\IGraphicsScene.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\common\graphics\IMaterial.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\graphics\src\d3d11albedographicspipeline.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\graphics\src\d3d11device.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\graphics\src\d3d11material.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\graphics\src\d3d11phonggraphicspipeline.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\graphics\src\d3d11scene.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\graphics\src\ID3D11GraphicsPipeline.h" />
   </ItemGroup>
 </Project>

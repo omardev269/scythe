@@ -19,11 +19,13 @@ bool scythe::D3D11GraphicsDevice::Create(Window* apWindow) {
 		i_DepthStencilStateEnabled = NULL;
 		i_DepthStencilStateDisabled = NULL;
 		i_RasterizerState = NULL;
+		i_TransparencyBlendState = NULL;
 		i_DxgiAdapter = NULL;
 		i_DxgiDevice = NULL;
 		i_DxgiFactory = NULL;
 		i_Swapchain = NULL;
 		m_Warp = false;
+		m_DepthEnabled = true;
 		m_ClearColor = { 0.4f, 0.6f, 1.0f, 1.0f };
 		SC_ZMEM(&m_Viewport, sizeof(m_Viewport));
 		SC_ZMEM(&m_OldRect, sizeof(m_OldRect));
@@ -95,6 +97,9 @@ bool scythe::D3D11GraphicsDevice::Create(Window* apWindow) {
 	{
 		RECT m_WindowRect;
 		GetClientRect(h_Window, &m_WindowRect);
+		m_Viewport.Width = static_cast<FLOAT>(m_WindowRect.right - m_WindowRect.left);
+		m_Viewport.Height = static_cast<FLOAT>(m_WindowRect.bottom - m_WindowRect.top);
+		m_Viewport.MaxDepth = 1.0f;
 		D3D11_TEXTURE2D_DESC m_DepthTextureDesc;
 		SC_ZMEM(&m_DepthTextureDesc, sizeof(D3D11_TEXTURE2D_DESC));
 		m_DepthTextureDesc.Width = (uint32)(m_WindowRect.right - m_WindowRect.left);
@@ -130,6 +135,20 @@ bool scythe::D3D11GraphicsDevice::Create(Window* apWindow) {
 		m_RasterizerDesc.FillMode = D3D11_FILL_SOLID;
 		m_RasterizerDesc.FrontCounterClockwise = TRUE;
 		SC_RET_SMART_CHECK(SUCCEEDED(i_Device->CreateRasterizerState(&m_RasterizerDesc, &i_RasterizerState)), "Rasterizer state creation failed");
+	}
+	{
+		D3D11_BLEND_DESC m_BlendDesc;
+		SC_ZMEM(&m_BlendDesc, sizeof(m_BlendDesc));
+		D3D11_RENDER_TARGET_BLEND_DESC& r_BlendTarget = m_BlendDesc.RenderTarget[0];
+		r_BlendTarget.BlendEnable = TRUE;
+		r_BlendTarget.SrcBlend = D3D11_BLEND_SRC_ALPHA;
+		r_BlendTarget.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+		r_BlendTarget.BlendOp = D3D11_BLEND_OP_ADD;
+		r_BlendTarget.SrcBlendAlpha = D3D11_BLEND_ONE;
+		r_BlendTarget.DestBlendAlpha = D3D11_BLEND_INV_SRC_ALPHA;
+		r_BlendTarget.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+		r_BlendTarget.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+		SC_RET_SMART_CHECK(SUCCEEDED(i_Device->CreateBlendState(&m_BlendDesc, &i_TransparencyBlendState)), "Transparency blend state creation failed");
 	}
 	return true;
 }
@@ -189,6 +208,29 @@ void scythe::D3D11GraphicsDevice::DisownContext(SpecialContextLock& aLock) {
 	aLock.i_DeviceContext = NULL;
 }
 
+void scythe::D3D11GraphicsDevice::BindDeviceDefaults(ID3D11DeviceContext* aiContext) {
+	aiContext->OMSetRenderTargets(1, &i_MasterRenderTargetView, i_DepthStencilView);
+	aiContext->RSSetState(i_RasterizerState);
+	aiContext->RSSetViewports(1, &m_Viewport);
+	aiContext->OMSetBlendState(i_TransparencyBlendState, NULL, 0xFFFFFFFF);
+	aiContext->OMSetDepthStencilState(m_DepthEnabled ? i_DepthStencilStateEnabled : i_DepthStencilStateDisabled, 0);
+}
+
+void scythe::D3D11GraphicsDevice::SetDepth(bool aEnabled) {
+	SpecialContextLock m_Lock = OwnContext();
+	m_DepthEnabled = aEnabled;
+	m_Lock.i_DeviceContext->OMSetDepthStencilState(m_DepthEnabled ? i_DepthStencilStateEnabled : i_DepthStencilStateDisabled, 0);
+	DisownContext(m_Lock);
+}
+
+void scythe::D3D11GraphicsDevice::Reset() {
+	SpecialContextLock m_Lock = OwnContext();
+	m_Lock.i_DeviceContext->ClearState();
+	m_DepthEnabled = true;
+	BindDeviceDefaults(m_Lock.i_DeviceContext);
+	DisownContext(m_Lock);
+}
+
 void scythe::D3D11GraphicsDevice::BeginFrame() {
 	{
 		SpecialContextLock m_Lock = OwnContext();
@@ -213,12 +255,9 @@ void scythe::D3D11GraphicsDevice::BeginFrame() {
 				}
 			}
 		}
-		m_Lock.i_DeviceContext->OMSetRenderTargets(1, &i_MasterRenderTargetView, i_DepthStencilView);
-		m_Lock.i_DeviceContext->RSSetState(i_RasterizerState);
+		BindDeviceDefaults(m_Lock.i_DeviceContext);
 		m_Lock.i_DeviceContext->ClearRenderTargetView(i_MasterRenderTargetView, &m_ClearColor.x);
 		m_Lock.i_DeviceContext->ClearDepthStencilView(i_DepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-		m_Lock.i_DeviceContext->OMSetDepthStencilState(i_DepthStencilStateEnabled, 0);
-		m_Lock.i_DeviceContext->RSSetViewports(1, &m_Viewport);
 		DisownContext(m_Lock);
 	}
 }
@@ -228,6 +267,7 @@ void scythe::D3D11GraphicsDevice::EndFrame() {
 }
 
 void scythe::D3D11GraphicsDevice::Dismiss() {
+	SC_IFNOTNULLRELEASE(i_TransparencyBlendState);
 	SC_IFNOTNULLRELEASE(i_RasterizerState);
 	SC_IFNOTNULLRELEASE(i_DepthStencilStateDisabled);
 	SC_IFNOTNULLRELEASE(i_DepthStencilStateEnabled);

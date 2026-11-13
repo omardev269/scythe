@@ -25,6 +25,18 @@
     <Filter Include="core\material\d3d11">
       <UniqueIdentifier>{0a7da4a4-9bc8-4c52-8bda-b1031be9c45a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="pipeline">
+      <UniqueIdentifier>{5e84cf82-57e2-462e-8dd1-5004def1765f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pipeline\d3d11">
+      <UniqueIdentifier>{7a2c73f4-6160-4524-a2df-3174a3e34b1d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pipeline\d3d11\albedo">
+      <UniqueIdentifier>{24b6cee5-a1ef-4e3d-b410-837358b8e8f5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="pipeline\d3d11\phong">
+      <UniqueIdentifier>{8f5e3065-8b02-4230-9d62-256ff9c9cc06}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="$(MSBuildThisFileDirectory)..\graphics\src\graphicsCore.c">
@@ -51,6 +63,15 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\graphics\src\d3d11material.cpp">
       <Filter>core\material\d3d11</Filter>
     </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\graphics\src\d3d11albedographicspipeline.cpp">
+      <Filter>pipeline\d3d11\albedo</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\graphics\src\pipeline.cpp">
+      <Filter>pipeline</Filter>
+    </ClCompile>
+    <ClCompile Include="$(MSBuildThisFileDirectory)..\graphics\src\d3d11phonggraphicspipeline.cpp">
+      <Filter>pipeline\d3d11\phong</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\common\graphics\freeflycam.h">
@@ -76,6 +97,18 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\common\graphics\graphicsCore.h">
       <Filter>core</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\common\graphics\IGraphicsPipeline.h">
+      <Filter>pipeline</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\graphics\src\ID3D11GraphicsPipeline.h">
+      <Filter>pipeline\d3d11</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\graphics\src\d3d11albedographicspipeline.h">
+      <Filter>pipeline\d3d11\albedo</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\graphics\src\d3d11phonggraphicspipeline.h">
+      <Filter>pipeline\d3d11\phong</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

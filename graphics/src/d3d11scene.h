@@ -34,13 +34,14 @@ namespace scythe
 		ID3D11Texture2D* i_WhiteTexture;
 		ID3D11ShaderResourceView* i_WhiteTextureSRV;
 		ID3D11SamplerState* i_WhiteSampler;
-		// --OPERATION VARIABLES
+		// --OPERATIONAL VARIABLES
 		std::mutex h_GeneralMutex;
 		std::vector<D3D11Object*> m_Objects;
+		std::vector<LIGHT_METADATA> m_Lights;
 
 	public:
 		bool Create(IGraphicsDevice* aiGraphicsDevice) override;
-		LightID CreateLight(float3 aLightPos, float32 aLightRange, /* currently unused */ float32 aEarlyIntensity) override;
+		LightID CreateLight(const LIGHT_METADATA& aMetadata) override;
 		ObjectID CreateObject(ulargeint aVertexBufferBytes, ulargeint aIndexBufferBytes, uint32 aStride) override;
 		ClumpID CreateClump(const CLUMP_METADATA& aMetadata, float32* apVertexStartData, uint16* apIndexStartData) override;
 		void UpdateClump(ClumpID aClump, const matrix4x4& aTransform) override;
@@ -54,6 +55,7 @@ namespace scythe
 		void DismissObject(ObjectID aObject) override;
 		void DismissLight(LightID aLight) override;
 		IGraphicsDevice* GetParent() override;
+		void Render(IGraphicsPipeline* aiPipeline, const matrix4x4& aPV) override;
 		void AlbedoRender(const matrix4x4& aPV) override;
 		void Dismiss() override;
 	};
