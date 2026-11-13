@@ -6,7 +6,7 @@
 #include <ID3D11GraphicsPipeline.h>
 #include <d3d11material.h>
 #include <runtime/rtdebug.h>
-#include <gb_math.h>
+#include <hlsl++.h>
 
 #define SC_IFNOTNULLRELEASE(ptr) do { if ((ptr)) { (ptr)->Release(); (ptr) = NULL; } } while (0)
 
@@ -411,6 +411,18 @@ void scythe::D3D11GraphicsScene::DismissLight(LightID aLight){
 	
 }
 
+namespace scythe {
+	// High confidence: preserve column-major GL transforms for the vertex shader.
+	SC_SPECIAL_STATIC void MultiplySceneTransform(float32* apOut, const matrix4x4& aPV, const matrix4x4& aModel) {
+		hlslpp::float4x4 m_PV, m_Model;
+		hlslpp::load(m_PV, aPV.m);
+		hlslpp::load(m_Model, aModel.m);
+		// Loading column-major matrices as rows transposes them, reversing multiplication order.
+		hlslpp::store(apOut, hlslpp::mul(m_Model, m_PV));
+	}
+	// End high confidence: scene transform multiplication.
+}
+
 scythe::IGraphicsDevice* scythe::D3D11GraphicsScene::GetParent() {
 	return i_GraphicsDevice;
 }
@@ -455,7 +467,7 @@ void scythe::D3D11GraphicsScene::Render(IGraphicsPipeline* aiPipeline, const mat
 				i_Sampler = p_Material->GetSampler();
 			}
 			matrix4x4 m_Transform;
-			gb_mat4_mul((gbMat4*)&m_Transform, (gbMat4*)&aPV, (gbMat4*)&r_Metadata.Transform);
+			MultiplySceneTransform(m_Transform.m, aPV, r_Metadata.Transform);
 			i_Pipeline->SetTransform(m_Transform);
 			i_Pipeline->SetRenderTexture(i_SRV);
 			i_Pipeline->SetRenderSampler(i_Sampler);
@@ -477,7 +489,7 @@ void scythe::D3D11GraphicsScene::Render(IGraphicsPipeline* aiPipeline, const mat
 }
 // End medium confidence: pipeline rendering.
 
-// Medium confidence: albedo rendering assumes gb_math column-major transforms.
+// Medium confidence: albedo rendering uses column-major GL transforms.
 void scythe::D3D11GraphicsScene::AlbedoRender(const matrix4x4& aPV) {
 	SC_ARM_D11GS_LOCK();
 	SpecialContextLock h_Context = i_GraphicsDevice->OwnContext();
@@ -531,7 +543,7 @@ void scythe::D3D11GraphicsScene::AlbedoRender(const matrix4x4& aPV) {
 				SC_LOG("Failed to map albedo constant buffer");
 				continue;
 			}
-			gb_mat4_mul((gbMat4*)m_Mapped.pData, (gbMat4*)&aPV, (gbMat4*)&r_Metadata.Transform);
+			MultiplySceneTransform(static_cast<float32*>(m_Mapped.pData), aPV, r_Metadata.Transform);
 			i_Context->Unmap(i_AlbedoConstantBuffer, 0);
 			i_Context->PSSetShaderResources(0, 1, &i_SRV);
 			i_Context->PSSetSamplers(0, 1, &i_Sampler);
