@@ -16,13 +16,15 @@ namespace scythe {
 		ID3D11ShaderResourceView* i_Texture;
 		ID3D11SamplerState* i_Sampler;
 		matrix4x4 m_Transform;
+		float3 m_EyePosition;
 		std::vector<LIGHT_METADATA> m_Lights;
 		// -
 		virtual void ReactionForTransformChange() = 0;
 	public:
 		virtual void Render(std::function<void()> ahDraw, bool aDepthEnabled) = 0;
-		void Render(std::function<void()> ahDraw) { Render(ahDraw, true); }
+		SC_INLINEFUNC void Render(std::function<void()> ahDraw) { Render(ahDraw, true); }
 		SC_INLINEFUNC D3D11GraphicsDevice* GetDevice() const { return i_Device; }
+		SC_INLINEFUNC void SetCameraPosition(float3 aEyePos) { m_EyePosition = aEyePos; }
 		SC_INLINEFUNC void SetTransform(const matrix4x4& aTransform) {
 			m_Transform = aTransform;
 			ReactionForTransformChange();

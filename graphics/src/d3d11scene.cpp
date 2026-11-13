@@ -415,13 +415,14 @@ scythe::IGraphicsDevice* scythe::D3D11GraphicsScene::GetParent() {
 	return i_GraphicsDevice;
 }
 
-void scythe::D3D11GraphicsScene::Render(IGraphicsPipeline* aiPipeline, const matrix4x4& aPV) {
+void scythe::D3D11GraphicsScene::Render(IGraphicsPipeline* aiPipeline, const matrix4x4& aPV, float3 aCameraPos) {
 	ID3D11GraphicsPipeline* i_Pipeline = dynamic_cast<ID3D11GraphicsPipeline*>(aiPipeline);
 	SC_ARM_D11GS_LOCK();
 	if (!i_Pipeline || i_Pipeline->GetDevice() != i_GraphicsDevice) {
 		SC_LOG("Scene pipeline is invalid or belongs to a different graphics device");
 		return;
 	}
+	i_Pipeline->SetCameraPosition(aCameraPos);
 	i_Pipeline->SetLights(m_Lights);
 	for (D3D11Object* p_Object : m_Objects) {
 		if (!p_Object) continue;

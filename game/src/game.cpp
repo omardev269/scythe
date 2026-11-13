@@ -16,6 +16,7 @@ static scythe::IGraphicsPipeline* g_iPipeline = NULL;
 static scythe::IMaterial* g_iMaterial = NULL;
 static scythe::ObjectID g_ObjectID = { 0 };
 static scythe::ClumpID g_ClumpID = { 0, 0 };
+static scythe::LightID g_LightID = { 0 };
 
 struct StructuredMesh {
 	scythe::ObjectID ObjID;
@@ -38,18 +39,18 @@ void start_game() {
 	m_MaterialDesc.PitchBytes = 8;
 	uint8  m_TextureData[16] = {
 		255, 0, 0, 255,
-		0, 255, 0, 255,
-		0, 255, 0, 255,
+		0, 255, 50, 255,
+		0, 255, 50, 255,
 		255, 0, 0, 255
 	};
 	m_MaterialDesc.pInitialData = m_TextureData;
 	scythe::CreateMaterial(g_iMaterial, scythe::g_iGraphicsDevice, m_MaterialDesc);
 	scythe::CreateGraphicsScene(g_iScene, scythe::g_iGraphicsDevice);
 	SC_SMART_CHECK(g_iScene, "Failed to create graphics scene");
-	g_ObjectID = g_iScene->CreateObject(60, 6, 20);
+	g_ObjectID = g_iScene->CreateObject(96, 6, 32);
 	scythe::CLUMP_METADATA m_Metadata = {};
 	m_Metadata.NumIndexBufferBytes = 6;
-	m_Metadata.NumVertexBufferBytes = 60;
+	m_Metadata.NumVertexBufferBytes = 96;
 	m_Metadata.NumIndices = 3;
 	m_Metadata.NumVertices = 3;
 	gb_mat4_identity((gbMat4*)&m_Metadata.Transform);
@@ -58,15 +59,20 @@ void start_game() {
 	m_Metadata.StartVertexBufferBytes = 0;
 	m_Metadata.StartIndexBufferBytes = 0;
 	m_Metadata.iMaterial = g_iMaterial;
-	float32 m_Vertices[15] = {
-		0.0f, 0.5f, 0.0f, 1.0f, 0.0f,
-		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f,
-		0.5f, -0.5f, 0.0f, 1.0f, 1.0f
+	float32 m_Vertices[24] = {
+		0.0f, 0.5f, 0.0f,	1.0f, 0.0f,		0, 0, 1,
+		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f,		0, 0, 1,
+		0.5f, -0.5f, 0.0f,	1.0f, 1.0f,		0, 0, 1
 	};
 	uint16 m_Indices[3] = { 0, 1, 2 };
 	g_ClumpID = g_iScene->CreateClump(m_Metadata, m_Vertices, m_Indices);
 	g_Camera.Reset();
 	g_Camera.SetSpeed(1.0f);
+	scythe::LIGHT_METADATA m_LightMetadata = {};
+	m_LightMetadata.Color = { 1.0f, 1.0f, 1.0f };
+	m_LightMetadata.Range = 3.0f;
+	m_LightMetadata.Position = { 0.0f, 0.0f, 1.0f };
+	g_LightID = g_iScene->CreateLight(m_LightMetadata);
 }
 
 
@@ -128,7 +134,9 @@ bool update_game() {
 		scythe::g_pWindow->GetSize(m_WindowSize);
 		g_Camera.Update(scythe::g_DeltaTime, 60.0f, (float32)m_WindowSize.x / m_WindowSize.y);
 		g_Camera.GetMatrix(g_PVMatrix);
-		g_iScene->Render(g_iPipeline, g_PVMatrix);
+		float3 m_CameraPosition;
+		g_Camera.GetPosition(m_CameraPosition);
+		g_iScene->Render(g_iPipeline, g_PVMatrix, m_CameraPosition);
 		g_iPipeline->Update();
 	}
 	return true;
@@ -136,6 +144,7 @@ bool update_game() {
 
 void end_game() {
 	if (g_iScene) {
+		g_iScene->DismissLight(g_LightID);
 		g_iScene->DismissClump(g_ClumpID);
 		g_iScene->DismissObject(g_ObjectID);
 		g_iScene->Dismiss();

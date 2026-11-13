@@ -54,7 +54,7 @@ namespace scythe
 		virtual void DismissClump(ClumpID& aClump) = 0;
 		virtual void DismissObject(ObjectID aObject) = 0;
 		virtual void DismissLight(LightID aLight) = 0;
-		virtual void Render(IGraphicsPipeline* aiPipeline, const matrix4x4& aPV) = 0;
+		virtual void Render(IGraphicsPipeline* aiPipeline, const matrix4x4& aPV, float3 aCameraPos) = 0;
 		virtual void AlbedoRender(const matrix4x4& aPV) = 0;
 		// Make sure that you join all threads using the scene before dismissing this class
 		virtual void Dismiss() = 0;

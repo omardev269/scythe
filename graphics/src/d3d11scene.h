@@ -55,7 +55,7 @@ namespace scythe
 		void DismissObject(ObjectID aObject) override;
 		void DismissLight(LightID aLight) override;
 		IGraphicsDevice* GetParent() override;
-		void Render(IGraphicsPipeline* aiPipeline, const matrix4x4& aPV) override;
+		void Render(IGraphicsPipeline* aiPipeline, const matrix4x4& aPV, float3 aCameraPos) override;
 		void AlbedoRender(const matrix4x4& aPV) override;
 		void Dismiss() override;
 	};
