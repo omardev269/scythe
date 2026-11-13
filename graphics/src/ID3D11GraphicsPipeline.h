@@ -10,6 +10,13 @@
 #ifdef SC_ALLOW_D3D11
 #include <d3d11device.h>
 namespace scythe {
+	struct SimpleLight {
+		float3 Position;
+		float32 Range;
+		float3 Color;
+		float32 Use;
+	};
+
 	class ID3D11GraphicsPipeline : public IGraphicsPipeline {
 	protected:
 		D3D11GraphicsDevice* i_Device;

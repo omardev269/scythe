@@ -35,8 +35,9 @@ namespace scythe
 	};
 	struct LIGHT_METADATA {
 		float3 Position;
-		float3 Color;
 		float32 Range;
+		float3 Color;
+		float32 Use; // internal use only
 	};
 	struct IGraphicsScene {
 		virtual bool Create(IGraphicsDevice* aiGraphicsDevice) = 0;

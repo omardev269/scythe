@@ -7,10 +7,14 @@
 #ifdef SC_ALLOW_D3D11
 namespace scythe {
 	class D3D11PhongPipeline : public ID3D11GraphicsPipeline {
+		struct PhongConstantBuffer {
+			matrix4x4 TransformationMatrix;
+			SimpleLight SimpleLights[16];
+		} m_ConstantBufferData;
 		ID3D11VertexShader* i_VertexShader = NULL;
 		ID3D11PixelShader* i_PixelShader = NULL;
 		ID3D11InputLayout* i_InputLayout = NULL;
-		ID3D11Buffer* i_TransformBuffer = NULL;
+		ID3D11Buffer* i_ConstantBuffer = NULL;
 		ID3D11Texture2D* i_RenderTexture = NULL;
 		ID3D11ShaderResourceView* i_RenderTextureView = NULL;
 		ID3D11RenderTargetView* i_RenderTargetView = NULL;
