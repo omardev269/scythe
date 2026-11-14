@@ -1,0 +1,6 @@
+<Project>
+  <Target Name="CopyExperimentalLoaderAssimp" AfterTargets="Build" Condition="'$(Platform)' == 'x64'">
+	<Warning Condition="!Exists('$(MSBuildThisFileDirectory)..\runtime\assimp-vc145-mt.dll')" Text="Experimental loader needs runtime\assimp-vc145-mt.dll." />
+	<Copy Condition="Exists('$(MSBuildThisFileDirectory)..\runtime\assimp-vc145-mt.dll')" SourceFiles="$(MSBuildThisFileDirectory)..\runtime\assimp-vc145-mt.dll" DestinationFolder="$(OutDir)" SkipUnchangedFiles="true" />
+  </Target>
+</Project>

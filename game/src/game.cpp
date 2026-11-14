@@ -8,28 +8,18 @@
 #include <graphics/IGraphicsPipeline.h>
 #include <graphics/freeflycam.h>
 #include <gb_math.h>
-#include <vector>
+#include "testloader.h"
 
 static scythe::FreeflyCamera g_Camera;
 static scythe::IGraphicsScene* g_iScene = NULL;
 static scythe::IGraphicsPipeline* g_iPipeline = NULL;
 static scythe::IMaterial* g_iMaterial = NULL;
-static scythe::ObjectID g_ObjectID = { 0 };
+static StructuredMesh g_Model = {};
 static scythe::ObjectID g_LightMarkerObjectID = { 0 };
-static scythe::ClumpID g_ClumpID = { 0, 0 };
 static scythe::ClumpID g_LightMarkerClumpID = { 0, 0 };
 static scythe::LightID g_LightID = { 0 };
 static float3 g_LightPosition;
 static float3 g_LightMarkerPosition;
-
-struct StructuredMesh {
-	scythe::ObjectID ObjID;
-	std::vector<scythe::ClumpID> Clumps;
-	std::vector<float32> Vertices; // stride must be 20B
-	std::vector<uint16> Indices;
-};
-
-StructuredMesh LoadMeshIntoSceneAndRetrieveInfo(const char* aFilePath, scythe::IGraphicsScene* aiScene);
 
 void start_game() {
 	scythe::CreatePhongGraphicsPipeline(g_iPipeline, scythe::g_iGraphicsDevice);
@@ -50,31 +40,23 @@ void start_game() {
 	m_MaterialDesc.pInitialData = m_TextureData;
 	scythe::CreateMaterial(g_iMaterial, scythe::g_iGraphicsDevice, m_MaterialDesc);
 	scythe::CreateGraphicsScene(g_iScene, scythe::g_iGraphicsDevice);
-	SC_SMART_CHECK(g_iScene, "Failed to create graphics scene");
-	g_ObjectID = g_iScene->CreateObject(96, 6, 32);
-	scythe::CLUMP_METADATA m_Metadata = {};
-	m_Metadata.NumIndexBufferBytes = 6;
-	m_Metadata.NumVertexBufferBytes = 96;
-	m_Metadata.NumIndices = 3;
-	m_Metadata.NumVertices = 3;
-	gb_mat4_identity((gbMat4*)&m_Metadata.Transform);
-	m_Metadata.Parent = g_ObjectID;
-	m_Metadata.StartIndex = 0;
-	m_Metadata.StartVertexBufferBytes = 0;
-	m_Metadata.StartIndexBufferBytes = 0;
-	m_Metadata.iMaterial = g_iMaterial;
+	if (!g_iScene) {
+		SC_LOG("Failed to create graphics scene");
+		return;
+	}
+	g_Model = LoadMeshIntoSceneAndRetrieveInfo("test.glb", g_iScene);
+	if (!g_Model.ObjID.ID) SC_LOG("Failed to load test.glb from the working directory");
 	float32 m_Vertices[24] = {
 		0.0f, 0.5f, 0.0f,	1.0f, 0.0f,		0, 0, 1,
 		-0.5f, -0.5f, 0.0f, 0.0f, 1.0f,		0, 0, 1,
 		0.5f, -0.5f, 0.0f,	1.0f, 1.0f,		0, 0, 1
 	};
-	uint16 m_Indices[3] = { 0, 1, 2 };
-	g_ClumpID = g_iScene->CreateClump(m_Metadata, m_Vertices, m_Indices);
 	g_LightMarkerObjectID = g_iScene->CreateObject(96, 12, 32);
-	scythe::CLUMP_METADATA m_LightMarkerMetadata = m_Metadata;
+	scythe::CLUMP_METADATA m_LightMarkerMetadata = {};
 	m_LightMarkerMetadata.Parent = g_LightMarkerObjectID;
-	m_LightMarkerMetadata.StartIndex = 0;
-	m_LightMarkerMetadata.StartIndexBufferBytes = 0;
+	m_LightMarkerMetadata.NumVertexBufferBytes = 96;
+	m_LightMarkerMetadata.NumVertices = 3;
+	m_LightMarkerMetadata.iMaterial = g_iMaterial;
 	m_LightMarkerMetadata.NumIndexBufferBytes = 12;
 	m_LightMarkerMetadata.NumIndices = 6;
 	gbVec3 m_LightMarkerTranslation = { 0.0f, 0.0f, 1.0f };
@@ -86,7 +68,7 @@ void start_game() {
 	g_Camera.SetSpeed(1.0f);
 	scythe::LIGHT_METADATA m_LightMetadata = {};
 	m_LightMetadata.Color = { 1.0f, 1.0f, 1.0f };
-	m_LightMetadata.Range = 3.0f;
+	m_LightMetadata.Range = 0.1f;
 	m_LightMetadata.Position = { 0.0f, 0.0f, 1.0f };
 	g_LightPosition = m_LightMetadata.Position;
 	g_LightID = g_iScene->CreateLight(m_LightMetadata);
@@ -195,11 +177,12 @@ void end_game() {
 	if (g_iScene) {
 		g_iScene->DismissLight(g_LightID);
 		g_iScene->DismissClump(g_LightMarkerClumpID);
-		g_iScene->DismissClump(g_ClumpID);
 		g_iScene->DismissObject(g_LightMarkerObjectID);
-		g_iScene->DismissObject(g_ObjectID);
+		if (g_Model.ObjID.ID) g_iScene->DismissObject(g_Model.ObjID);
 		g_iScene->Dismiss();
 	}
+	for (scythe::IMaterial* i_Material : g_Model.Materials) i_Material->Dismiss();
+	g_Model = {};
 	if (g_iMaterial) g_iMaterial->Dismiss();
 	if (g_iPipeline) g_iPipeline->Dismiss();
 }

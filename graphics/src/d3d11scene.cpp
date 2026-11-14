@@ -244,9 +244,9 @@ scythe::ClumpID scythe::D3D11GraphicsScene::CreateClump(const scythe::CLUMP_META
 			SC_CREATE_AND_ZERO(D3D11_BOX, m_Box);
 			m_Box.left = aMetadata.StartVertexBufferBytes;
 			m_Box.right = aMetadata.StartVertexBufferBytes + aMetadata.NumVertexBufferBytes;
-			if (m_Box.right < p_Object->m_VertexBufferBytes) {
+			if (m_Box.right > p_Object->m_VertexBufferBytes) {
 				i_GraphicsDevice->DisownContext(h_SpecialLock);
-				SC_RET_SMART_CHECK(m_Box.right >= p_Object->m_VertexBufferBytes, "Vertex buffer overflow");
+				SC_RET_SMART_CHECK(m_Box.right <= p_Object->m_VertexBufferBytes, "Vertex buffer overflow");
 			}
 			m_Box.bottom = 1;
 			m_Box.back = 1;
@@ -257,9 +257,9 @@ scythe::ClumpID scythe::D3D11GraphicsScene::CreateClump(const scythe::CLUMP_META
 			SC_CREATE_AND_ZERO(D3D11_BOX, m_Box);
 			m_Box.left = aMetadata.StartIndexBufferBytes;
 			m_Box.right = aMetadata.StartIndexBufferBytes + aMetadata.NumIndexBufferBytes;
-			if (m_Box.right < p_Object->m_IndexBufferBytes) {
+			if (m_Box.right > p_Object->m_IndexBufferBytes) {
 				i_GraphicsDevice->DisownContext(h_SpecialLock);
-				SC_RET_SMART_CHECK(m_Box.right >= p_Object->m_IndexBufferBytes, "Index buffer overflow");
+				SC_RET_SMART_CHECK(m_Box.right <= p_Object->m_IndexBufferBytes, "Index buffer overflow");
 			}
 			m_Box.bottom = 1;
 			m_Box.back = 1;
