@@ -37,7 +37,7 @@ namespace scythe
 		float3 Position;
 		float32 Range;
 		float3 Color;
-		float32 Use; // internal use only
+		float32 Use; // internal
 	};
 	struct IGraphicsScene {
 		virtual bool Create(IGraphicsDevice* aiGraphicsDevice) = 0;

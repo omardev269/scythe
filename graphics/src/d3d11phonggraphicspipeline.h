@@ -7,9 +7,12 @@
 #ifdef SC_ALLOW_D3D11
 namespace scythe {
 	class D3D11PhongPipeline : public ID3D11GraphicsPipeline {
+		enum { MaxLights = 2 };
 		struct PhongConstantBuffer {
 			matrix4x4 TransformationMatrix;
-			SimpleLight SimpleLights[16];
+			SimpleLight SimpleLights[MaxLights];
+			float3 EyePos;
+			float32 EyePosPadding;
 		} m_ConstantBufferData;
 		ID3D11VertexShader* i_VertexShader = NULL;
 		ID3D11PixelShader* i_PixelShader = NULL;

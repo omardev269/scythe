@@ -396,19 +396,26 @@ void scythe::D3D11GraphicsScene::DismissObject(ObjectID aObject) {
 scythe::LightID scythe::D3D11GraphicsScene::CreateLight(const LIGHT_METADATA& aMetadata) {
 	SC_ARM_D11GS_LOCK();
 	m_Lights.push_back(aMetadata);
+	m_Lights.back().Use = 1.0f;
 	return { static_cast<uint32>(m_Lights.size()) };
 }
 
 void scythe::D3D11GraphicsScene::UpdateLight(LightID aLight, float3 aLightPos) {
 	SC_ARM_D11GS_LOCK();
-	if (aLight.ID == 0 || aLight.ID > m_Lights.size()) return;
+	if (aLight.ID == 0 || aLight.ID > m_Lights.size() || m_Lights[aLight.ID - 1].Use == 0.0f) {
+		SC_LOG("Cannot update an invalid or dismissed light");
+		return;
+	}
 	m_Lights[aLight.ID - 1].Position = aLightPos;
 }
 
 void scythe::D3D11GraphicsScene::DismissLight(LightID aLight){
 	SC_ARM_D11GS_LOCK();
-	if (aLight.ID == 0 || aLight.ID > m_Lights.size()) return;
-	
+	if (aLight.ID == 0 || aLight.ID > m_Lights.size() || m_Lights[aLight.ID - 1].Use == 0.0f) {
+		SC_LOG("Cannot dismiss an invalid or dismissed light");
+		return;
+	}
+	m_Lights[aLight.ID - 1].Use = 0.0f;
 }
 
 namespace scythe {
@@ -435,7 +442,11 @@ void scythe::D3D11GraphicsScene::Render(IGraphicsPipeline* aiPipeline, const mat
 		return;
 	}
 	i_Pipeline->SetCameraPosition(aCameraPos);
-	i_Pipeline->SetLights(m_Lights);
+	std::vector<LIGHT_METADATA> m_ActiveLights;
+	for (const LIGHT_METADATA& r_Light : m_Lights) {
+		if (r_Light.Use != 0.0f) m_ActiveLights.push_back(r_Light);
+	}
+	i_Pipeline->SetLights(m_ActiveLights);
 	for (D3D11Object* p_Object : m_Objects) {
 		if (!p_Object) continue;
 		D3D11_BUFFER_DESC m_VertexDesc, m_IndexDesc;

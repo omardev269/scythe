@@ -16,9 +16,7 @@ struct StructuredMesh {
 	std::vector<uint16> Indices;
 };
 
-#if 0
 // only for internal tests - not optimized
 StructuredMesh LoadMeshIntoSceneAndRetrieveInfo(const char* aFilePath, scythe::IGraphicsScene* aiScene) {
-	
+	return {};
 }
-#endif // 0

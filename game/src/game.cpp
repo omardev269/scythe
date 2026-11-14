@@ -15,8 +15,12 @@ static scythe::IGraphicsScene* g_iScene = NULL;
 static scythe::IGraphicsPipeline* g_iPipeline = NULL;
 static scythe::IMaterial* g_iMaterial = NULL;
 static scythe::ObjectID g_ObjectID = { 0 };
+static scythe::ObjectID g_LightMarkerObjectID = { 0 };
 static scythe::ClumpID g_ClumpID = { 0, 0 };
+static scythe::ClumpID g_LightMarkerClumpID = { 0, 0 };
 static scythe::LightID g_LightID = { 0 };
+static float3 g_LightPosition;
+static float3 g_LightMarkerPosition;
 
 struct StructuredMesh {
 	scythe::ObjectID ObjID;
@@ -66,12 +70,25 @@ void start_game() {
 	};
 	uint16 m_Indices[3] = { 0, 1, 2 };
 	g_ClumpID = g_iScene->CreateClump(m_Metadata, m_Vertices, m_Indices);
+	g_LightMarkerObjectID = g_iScene->CreateObject(96, 12, 32);
+	scythe::CLUMP_METADATA m_LightMarkerMetadata = m_Metadata;
+	m_LightMarkerMetadata.Parent = g_LightMarkerObjectID;
+	m_LightMarkerMetadata.StartIndex = 0;
+	m_LightMarkerMetadata.StartIndexBufferBytes = 0;
+	m_LightMarkerMetadata.NumIndexBufferBytes = 12;
+	m_LightMarkerMetadata.NumIndices = 6;
+	gbVec3 m_LightMarkerTranslation = { 0.0f, 0.0f, 1.0f };
+	gb_mat4_translate((gbMat4*)&m_LightMarkerMetadata.Transform, m_LightMarkerTranslation);
+	uint16 m_LightMarkerIndices[6] = { 0, 2, 1, 0, 1, 2 };
+	g_LightMarkerClumpID = g_iScene->CreateClump(m_LightMarkerMetadata, m_Vertices, m_LightMarkerIndices);
+	g_LightMarkerPosition = { 0.0f, 0.0f, 1.0f };
 	g_Camera.Reset();
 	g_Camera.SetSpeed(1.0f);
 	scythe::LIGHT_METADATA m_LightMetadata = {};
 	m_LightMetadata.Color = { 1.0f, 1.0f, 1.0f };
 	m_LightMetadata.Range = 3.0f;
 	m_LightMetadata.Position = { 0.0f, 0.0f, 1.0f };
+	g_LightPosition = m_LightMetadata.Position;
 	g_LightID = g_iScene->CreateLight(m_LightMetadata);
 }
 
@@ -94,38 +111,70 @@ bool update_game() {
 	}
 	// camera logic
 	{
-		float3 m_CamRotation;
-		g_Camera.GetRotation(m_CamRotation);
-		const float32 m_YawRad = gb_to_radians(m_CamRotation.y);
-		const float32 m_Cos = cosf(m_YawRad);
-		const float32 m_Sin = sinf(m_YawRad);
-		if (scythe::g_pWindow->GetKey(scythe::Key::W)) {
-			g_Camera.Move({ m_Sin, 0, -m_Cos });
-		}
-		if (scythe::g_pWindow->GetKey(scythe::Key::S)) {
-			g_Camera.Move({ -m_Sin, 0, m_Cos });
-		}
-		if (scythe::g_pWindow->GetKey(scythe::Key::A)) {
-			g_Camera.Move({ -m_Cos, 0, -m_Sin });
-		}
-		if (scythe::g_pWindow->GetKey(scythe::Key::D)) {
-			g_Camera.Move({ m_Cos, 0, m_Sin });
-		}
-		if (scythe::g_pWindow->GetKey(scythe::Key::Space)) {
-			g_Camera.Move({ 0, 1, 0 });
-		}
-		if (scythe::g_pWindow->GetKey(scythe::Key::LeftShift)) {
-			g_Camera.Move({ 0, -1, 0 });
-		}
-		// view rotation (skipped on the first frame)
-		static bool s_FirstLookFrame = true;
-		float2 m_MouseDelta;
-		scythe::g_pWindow->GetMouseDelta(m_MouseDelta);
-		if (s_FirstLookFrame) {
-			s_FirstLookFrame = false;
+		if (!scythe::g_pWindow->GetKey(scythe::Key::LeftControl)) {
+			float3 m_CamRotation;
+			g_Camera.GetRotation(m_CamRotation);
+			const float32 m_YawRad = gb_to_radians(m_CamRotation.y);
+			const float32 m_Cos = cosf(m_YawRad);
+			const float32 m_Sin = sinf(m_YawRad);
+			if (scythe::g_pWindow->GetKey(scythe::Key::W)) {
+				g_Camera.Move({ m_Sin, 0, -m_Cos });
+			}
+			if (scythe::g_pWindow->GetKey(scythe::Key::S)) {
+				g_Camera.Move({ -m_Sin, 0, m_Cos });
+			}
+			if (scythe::g_pWindow->GetKey(scythe::Key::A)) {
+				g_Camera.Move({ -m_Cos, 0, -m_Sin });
+			}
+			if (scythe::g_pWindow->GetKey(scythe::Key::D)) {
+				g_Camera.Move({ m_Cos, 0, m_Sin });
+			}
+			if (scythe::g_pWindow->GetKey(scythe::Key::Space)) {
+				g_Camera.Move({ 0, 1, 0 });
+			}
+			if (scythe::g_pWindow->GetKey(scythe::Key::LeftShift)) {
+				g_Camera.Move({ 0, -1, 0 });
+			}
+			// view rotation (skipped on the first frame)
+			static bool s_FirstLookFrame = true;
+			float2 m_MouseDelta;
+			scythe::g_pWindow->GetMouseDelta(m_MouseDelta);
+			if (s_FirstLookFrame) {
+				s_FirstLookFrame = false;
+			}
+			else {
+				g_Camera.Rotate({ m_MouseDelta.y, m_MouseDelta.x, 0 });
+			}
 		}
 		else {
-			g_Camera.Rotate({ m_MouseDelta.y, m_MouseDelta.x, 0 });
+			if (scythe::g_pWindow->GetKey(scythe::Key::W)) {
+				g_LightPosition.z -= scythe::g_DeltaTime;
+			}
+			if (scythe::g_pWindow->GetKey(scythe::Key::S)) {
+				g_LightPosition.z += scythe::g_DeltaTime;
+			}
+			if (scythe::g_pWindow->GetKey(scythe::Key::A)) {
+				g_LightPosition.x -= scythe::g_DeltaTime;
+			}
+			if (scythe::g_pWindow->GetKey(scythe::Key::D)) {
+				g_LightPosition.x += scythe::g_DeltaTime;
+			}
+			if (scythe::g_pWindow->GetKey(scythe::Key::Space)) {
+				g_LightPosition.y += scythe::g_DeltaTime;
+			}
+			if (scythe::g_pWindow->GetKey(scythe::Key::LeftShift)) {
+				g_LightPosition.y -= scythe::g_DeltaTime;
+			}
+			if (g_LightPosition.x != g_LightMarkerPosition.x ||
+				g_LightPosition.y != g_LightMarkerPosition.y ||
+				g_LightPosition.z != g_LightMarkerPosition.z) {
+				g_iScene->UpdateLight(g_LightID, g_LightPosition);
+				gbVec3 m_LightMarkerTranslation = { g_LightPosition.x, g_LightPosition.y, g_LightPosition.z };
+				matrix4x4 m_LightMarkerTransform;
+				gb_mat4_translate((gbMat4*)&m_LightMarkerTransform, m_LightMarkerTranslation);
+				g_iScene->UpdateClump(g_LightMarkerClumpID, m_LightMarkerTransform);
+				g_LightMarkerPosition = g_LightPosition;
+			}
 		}
 	}
 	// render
@@ -145,7 +194,9 @@ bool update_game() {
 void end_game() {
 	if (g_iScene) {
 		g_iScene->DismissLight(g_LightID);
+		g_iScene->DismissClump(g_LightMarkerClumpID);
 		g_iScene->DismissClump(g_ClumpID);
+		g_iScene->DismissObject(g_LightMarkerObjectID);
 		g_iScene->DismissObject(g_ObjectID);
 		g_iScene->Dismiss();
 	}
