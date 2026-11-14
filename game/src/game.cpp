@@ -68,7 +68,7 @@ void start_game() {
 	g_Camera.SetSpeed(1.0f);
 	scythe::LIGHT_METADATA m_LightMetadata = {};
 	m_LightMetadata.Color = { 1.0f, 1.0f, 1.0f };
-	m_LightMetadata.Range = 0.1f;
+	m_LightMetadata.Range = 100.0f;
 	m_LightMetadata.Position = { 0.0f, 0.0f, 1.0f };
 	g_LightPosition = m_LightMetadata.Position;
 	g_LightID = g_iScene->CreateLight(m_LightMetadata);
