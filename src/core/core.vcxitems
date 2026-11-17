@@ -14,7 +14,8 @@
     <ProjectCapability Include="SourceItemsFromImports" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\common\core\additional_definitions.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\common\core\additional_core_definitions.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\common\core\cppstuff.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\common\core\platform.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\common\core\system_headers.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\common\core\types.h" />

@@ -15,7 +15,10 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\common\core\system_headers.h">
       <Filter>core_headers</Filter>
     </ClInclude>
-    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\common\core\additional_definitions.h">
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\common\core\additional_core_definitions.h">
+      <Filter>core_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\common\core\cppstuff.h">
       <Filter>core_headers</Filter>
     </ClInclude>
   </ItemGroup>
