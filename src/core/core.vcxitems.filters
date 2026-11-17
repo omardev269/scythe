@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="core_headers">
+      <UniqueIdentifier>{6ceb4242-d103-4323-b602-1c126df86901}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\common\core\platform.h">
+      <Filter>core_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\common\core\types.h">
+      <Filter>core_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\common\core\system_headers.h">
+      <Filter>core_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\common\core\additional_definitions.h">
+      <Filter>core_headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -1,1 +1,10 @@
-<Solution />
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="game/game.vcxitems" />
+  <Project Path="scythe_win32/scythe_win32.vcxproj" />
+  <Project Path="src/core/core.vcxitems" />
+  <Project Path="src/runtime/runtime.vcxitems" />
+</Solution>
