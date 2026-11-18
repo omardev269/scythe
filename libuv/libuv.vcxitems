@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup Label="Globals">
+    <MSBuildAllProjects Condition="'$(MSBuildVersion)' == '' Or '$(MSBuildVersion)' &lt; '16.0'">$(MSBuildAllProjects);$(MSBuildThisFileFullPath)</MSBuildAllProjects>
+    <HasSharedItems>true</HasSharedItems>
+    <ItemsProjectGuid>{c8e30cf4-d888-4eeb-9cdc-4ad661337437}</ItemsProjectGuid>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(MSBuildThisFileDirectory)</AdditionalIncludeDirectories>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ProjectCapability Include="SourceItemsFromImports" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\alloc.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\fs-common.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\fs-poll.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\idna.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\inet.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\net-common.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\random.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\strscpy.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\strtok.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\thread-common.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\threadpool.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\timer.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\uv-common.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\uv-data-getter-setters.c" />
+    <ClCompile Include="$(MSBuildThisFileDirectory)src\version.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\heap-inl.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\idna.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\queue.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\strscpy.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\strtok.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)src\uv-common.h" />
+  </ItemGroup>
+</Project>

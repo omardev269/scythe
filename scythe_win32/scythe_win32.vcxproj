@@ -59,6 +59,8 @@
     <Import Project="..\src\core\core.vcxitems" Label="Shared" />
     <Import Project="..\src\runtime\runtime.vcxitems" Label="Shared" />
     <Import Project="..\game\game.vcxitems" Label="Shared" />
+    <Import Project="..\libuv\libuv.vcxitems" Label="Shared" />
+    <Import Project="..\SDL3\SDL3.vcxitems" Label="Shared" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -75,25 +77,25 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <TargetName>scytheTest</TargetName>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir).\src;$(SolutionDir).\common;$(SolutionDir).\outsider;</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir).\src;$(SolutionDir).\common;$(SolutionDir).\outsider;$(SolutionDir).\libuv\src;$(SolutionDir).\SDL3;</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <TargetName>scytheTest</TargetName>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir).\src;$(SolutionDir).\common;$(SolutionDir).\outsider;</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir).\src;$(SolutionDir).\common;$(SolutionDir).\outsider;$(SolutionDir).\libuv\src;$(SolutionDir).\SDL3;</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <TargetName>scytheTest</TargetName>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir).\src;$(SolutionDir).\common;$(SolutionDir).\outsider;</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir).\src;$(SolutionDir).\common;$(SolutionDir).\outsider;$(SolutionDir).\libuv\src;$(SolutionDir).\SDL3;</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetName>scytheTest</TargetName>
-    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir).\src;$(SolutionDir).\common;$(SolutionDir).\outsider;</IncludePath>
+    <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath);$(SolutionDir).\src;$(SolutionDir).\common;$(SolutionDir).\outsider;$(SolutionDir).\libuv\src;$(SolutionDir).\SDL3;</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>SC_DEBUG;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;SC_DEBUG;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -103,6 +105,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);ws2_32.lib;iphlpapi.lib;userenv.lib;dbghelp.lib;synchronization.lib;psapi.lib;advapi32.lib;user32.lib;shell32.lib;ole32.lib;</AdditionalDependencies>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
@@ -114,7 +117,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>SC_RELEASE;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;SC_RELEASE;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -125,6 +128,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);ws2_32.lib;iphlpapi.lib;userenv.lib;dbghelp.lib;synchronization.lib;psapi.lib;advapi32.lib;user32.lib;shell32.lib;ole32.lib;</AdditionalDependencies>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
@@ -134,7 +138,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>SC_DEBUG;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;SC_DEBUG;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
@@ -144,6 +148,7 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);ws2_32.lib;iphlpapi.lib;userenv.lib;dbghelp.lib;synchronization.lib;psapi.lib;advapi32.lib;user32.lib;shell32.lib;ole32.lib;</AdditionalDependencies>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
@@ -155,7 +160,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>SC_RELEASE;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;SC_RELEASE;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -166,12 +171,47 @@
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>$(CoreLibraryDependencies);%(AdditionalDependencies);ws2_32.lib;iphlpapi.lib;userenv.lib;dbghelp.lib;synchronization.lib;psapi.lib;advapi32.lib;user32.lib;shell32.lib;ole32.lib;</AdditionalDependencies>
     </Link>
     <Manifest>
       <EnableSegmentHeap>true</EnableSegmentHeap>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\libuv\src\win\async.c" />
+    <ClCompile Include="..\libuv\src\win\core.c" />
+    <ClCompile Include="..\libuv\src\win\detect-wakeup.c" />
+    <ClCompile Include="..\libuv\src\win\dl.c" />
+    <ClCompile Include="..\libuv\src\win\error.c" />
+    <ClCompile Include="..\libuv\src\win\fs-event.c" />
+    <ClCompile Include="..\libuv\src\win\fs.c" />
+    <ClCompile Include="..\libuv\src\win\getaddrinfo.c" />
+    <ClCompile Include="..\libuv\src\win\getnameinfo.c" />
+    <ClCompile Include="..\libuv\src\win\handle.c" />
+    <ClCompile Include="..\libuv\src\win\loop-watcher.c" />
+    <ClCompile Include="..\libuv\src\win\pipe.c" />
+    <ClCompile Include="..\libuv\src\win\poll.c" />
+    <ClCompile Include="..\libuv\src\win\process-stdio.c" />
+    <ClCompile Include="..\libuv\src\win\process.c" />
+    <ClCompile Include="..\libuv\src\win\signal.c" />
+    <ClCompile Include="..\libuv\src\win\snprintf.c" />
+    <ClCompile Include="..\libuv\src\win\stream.c" />
+    <ClCompile Include="..\libuv\src\win\tcp.c" />
+    <ClCompile Include="..\libuv\src\win\thread.c" />
+    <ClCompile Include="..\libuv\src\win\tty.c" />
+    <ClCompile Include="..\libuv\src\win\udp.c" />
+    <ClCompile Include="..\libuv\src\win\util.c" />
+    <ClCompile Include="..\libuv\src\win\winapi.c" />
+    <ClCompile Include="..\libuv\src\win\winsock.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\libuv\src\win\fs-fd-hash-inl.h" />
+    <ClInclude Include="..\libuv\src\win\handle-inl.h" />
+    <ClInclude Include="..\libuv\src\win\internal.h" />
+    <ClInclude Include="..\libuv\src\win\req-inl.h" />
+    <ClInclude Include="..\libuv\src\win\stream-inl.h" />
+    <ClInclude Include="..\libuv\src\win\winapi.h" />
+    <ClInclude Include="..\libuv\src\win\winsock.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

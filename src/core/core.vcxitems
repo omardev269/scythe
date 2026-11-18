@@ -19,5 +19,6 @@
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\common\core\platform.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\common\core\system_headers.h" />
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\common\core\types.h" />
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\common\core\window.h" />
   </ItemGroup>
 </Project>

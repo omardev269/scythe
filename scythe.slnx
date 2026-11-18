@@ -3,8 +3,10 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="game/game.vcxitems" />
-  <Project Path="scythe_win32/scythe_win32.vcxproj" />
-  <Project Path="src/core/core.vcxitems" />
-  <Project Path="src/runtime/runtime.vcxitems" />
+  <Project Path="game/game.vcxitems" Id="d83af9f5-f483-4e45-acbf-eb1833f4145e" />
+  <Project Path="libuv/libuv.vcxitems" Id="c8e30cf4-d888-4eeb-9cdc-4ad661337437" />
+  <Project Path="scythe_win32/scythe_win32.vcxproj" Id="f9c01966-dc2a-4e20-9bd3-ae5b987b5869" />
+  <Project Path="SDL3/SDL3.vcxitems" Id="460c086e-8717-4fa8-bbb8-f27f0a69ece5" />
+  <Project Path="src/core/core.vcxitems" Id="8c103a8a-f53c-4324-a2b0-7edc67475dea" />
+  <Project Path="src/runtime/runtime.vcxitems" Id="6ba2f108-1656-47b1-bf6d-e8e815a16c1c" />
 </Solution>

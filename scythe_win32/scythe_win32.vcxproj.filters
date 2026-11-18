@@ -1,2 +1,108 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" />
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="libuv_win32">
+      <UniqueIdentifier>{65966410-e1de-4b2b-81e3-d756eb2351bd}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\libuv\src\win\async.c">
+      <Filter>libuv_win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libuv\src\win\core.c">
+      <Filter>libuv_win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libuv\src\win\detect-wakeup.c">
+      <Filter>libuv_win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libuv\src\win\dl.c">
+      <Filter>libuv_win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libuv\src\win\error.c">
+      <Filter>libuv_win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libuv\src\win\fs.c">
+      <Filter>libuv_win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libuv\src\win\fs-event.c">
+      <Filter>libuv_win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libuv\src\win\getaddrinfo.c">
+      <Filter>libuv_win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libuv\src\win\getnameinfo.c">
+      <Filter>libuv_win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libuv\src\win\handle.c">
+      <Filter>libuv_win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libuv\src\win\loop-watcher.c">
+      <Filter>libuv_win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libuv\src\win\pipe.c">
+      <Filter>libuv_win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libuv\src\win\poll.c">
+      <Filter>libuv_win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libuv\src\win\process.c">
+      <Filter>libuv_win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libuv\src\win\process-stdio.c">
+      <Filter>libuv_win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libuv\src\win\signal.c">
+      <Filter>libuv_win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libuv\src\win\snprintf.c">
+      <Filter>libuv_win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libuv\src\win\stream.c">
+      <Filter>libuv_win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libuv\src\win\tcp.c">
+      <Filter>libuv_win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libuv\src\win\thread.c">
+      <Filter>libuv_win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libuv\src\win\tty.c">
+      <Filter>libuv_win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libuv\src\win\udp.c">
+      <Filter>libuv_win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libuv\src\win\util.c">
+      <Filter>libuv_win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libuv\src\win\winapi.c">
+      <Filter>libuv_win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\libuv\src\win\winsock.c">
+      <Filter>libuv_win32</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\libuv\src\win\fs-fd-hash-inl.h">
+      <Filter>libuv_win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libuv\src\win\handle-inl.h">
+      <Filter>libuv_win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libuv\src\win\internal.h">
+      <Filter>libuv_win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libuv\src\win\req-inl.h">
+      <Filter>libuv_win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libuv\src\win\stream-inl.h">
+      <Filter>libuv_win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libuv\src\win\winapi.h">
+      <Filter>libuv_win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\libuv\src\win\winsock.h">
+      <Filter>libuv_win32</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -4,6 +4,9 @@
     <Filter Include="core_headers">
       <UniqueIdentifier>{6ceb4242-d103-4323-b602-1c126df86901}</UniqueIdentifier>
     </Filter>
+    <Filter Include="window">
+      <UniqueIdentifier>{738debe2-d6db-4824-b56f-552fe9b7d559}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\common\core\platform.h">
@@ -20,6 +23,9 @@
     </ClInclude>
     <ClInclude Include="$(MSBuildThisFileDirectory)..\..\common\core\cppstuff.h">
       <Filter>core_headers</Filter>
+    </ClInclude>
+    <ClInclude Include="$(MSBuildThisFileDirectory)..\..\common\core\window.h">
+      <Filter>window</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
